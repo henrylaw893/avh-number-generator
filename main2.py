@@ -4,6 +4,7 @@ import tkinter.font as font
 from PIL import ImageTk, Image  
 import time
 from threading import Thread
+from math import exp
 
 from random_generator import RandomGenerator
 from stack_adt import ArrayStack
@@ -235,7 +236,16 @@ class Page1(tk.Frame):
             controller.destroy()
 
         def stop_idle(event):
-            self.idle_animation = ~self.idle_animation
+            for number in self.numbers:
+                number.run_idle_animation = not(number.run_idle_animation)
+
+        def start_idle(event):
+            for frame in self.numbers:
+                Thread(target = frame.idle_animation).start()
+
+        def start_normal_animation(event):
+            for frame in self.numbers:
+                Thread(target = frame.begin_normal_animation, args = (time.time(),)).start()
 
         self.bind("<Escape>",escapeKey)
 
@@ -243,9 +253,11 @@ class Page1(tk.Frame):
 
         self.bind("<space>",self.setup)
 
-        self.bind("<Right>", self.idle_animation_loop)
+        self.bind("<Right>", start_idle)
 
         self.bind("<Down>",stop_idle)
+
+        self.bind("<Up>",start_normal_animation)
 
     def setup(self, event):
         self.screen_height = self.controller.winfo_screenheight()
@@ -272,23 +284,27 @@ class Page1(tk.Frame):
         #Creating number frames
         #setting dimensions
         num_frames = 7
-        padding = 0
-        self.number_frame_width = self.screen_width/(num_frames-1) - padding #2 extra frames at the start and end
-        self.number_frame_height = number_frame_controller_height - padding
-        
-        #Create number frames
-        self.number_frames = []
-        posx = 0 - self.number_frame_width
+        self.numbers = []
         number_font = tk.font.Font(self.controller,font = "Poppins")
-        number_font["size"] = -(int((self.number_frame_width)/2.5))
+        number_font["size"] = -(int((self.screen_width/(num_frames-1))/2.5))
         for i in range(num_frames):
-            self.number_frames.append(NumberFrame(number_frame_controller, posx, self.number_frame_width, self.number_frame_height, self.ran_gen, number_font, num_frames,1))
-            posx += self.number_frame_width
+            self.numbers.append(Number(number_frame_controller, number_font, num_frames,self.ran_gen))
+            print(self.numbers[i].width)
+        
+        #setting dimensions
+        self.number_width = self.numbers[0].width
+        padding = (self.screen_width - self.number_width*(num_frames-1))/(num_frames)
 
-        #pointer
-        # self.pointer_line = tk.Frame(number_frame_controller, width = self.screen_width//110, height = number_frame_controller_height/2,
-        # borderwidth= self.screen_width//400, relief = "solid")
-        # self.pointer_line.place(relx = 0.5, rely = 0.5, anchor = "center")
+        posx = 0 - self.number_width
+        for number in self.numbers:
+            number.place_number(posx)
+            posx += self.number_width + padding
+
+        #Number(number_frame_controller, self.number_frame_width, number_font, num_frames,self.ran_gen)
+
+        self.pointer_line = tk.Frame(number_frame_controller, width = self.screen_width//110, height = number_frame_controller_height/2,
+        borderwidth= self.screen_width//400, relief = "solid")
+        self.pointer_line.place(relx = 0.5, rely = 0.5, anchor = "center")
 
         #backgrounds
         top_frame["bg"] = GENBACKGROUND
@@ -301,92 +317,65 @@ class Page1(tk.Frame):
         self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
         logo = ttk.Label(bottom_frame, image=self.avh_logo_image_tk)
         logo.place(relx = 0.5, rely = 0.5, anchor = "center")
-
-        self.idle_animation()
-    
-    def idle_animation(self):  
-        #Move number frames
-        self.speed = 3
-        self.sleep_time = 1
-        self.min_x = 0 - self.number_frame_width
-        self.posy = self.number_frame_height
-        self.last_frame = self.number_frames[-1]
-        #self.posx_last_frame = self.number_frames[self.last_frame][1]
-        #while self.run_idle_animation:
-            #calculate new positions
-    def idle_animation_loop(self, *args):
-        for frame in self.number_frames:
-            Thread(target = frame.idle_animation).start()
-        
-        # timestart = time.time()
-        # for frame in self.number_frames:
-        #     new_posx = frame.posx - self.speed
-        #     if new_posx < self.min_x:
-        #         new_posx = self.last_frame.posx + self.number_frame_width
-        #         self.last_frame = frame
-        #         print("teleported")
-        #     frame.place(x = new_posx, y = 0)
-        #     frame.posx = new_posx
-        # timeend = time.time()
-        # timetaken = (timeend - timestart)*1000
-        # print(timetaken)
-        # self.speed -= 0.0005
-        # if self.speed > 0:
-        #     self.after(int(1-timetaken), self.idle_animation_loop)
-
-                    
-    
-    def idle_position(self, time):
-        speed = -10 #negative for left
-        return time*speed
             
-class NumberFrame(tk.Frame):
-    def __init__(self, controller, start_pos, width, height, ran_gen, font, num_frames, speed):
-        tk.Frame.__init__(self, controller)
+class Number(tk.Label):
 
-        self.configure(height = height, width = width, bg = GENBACKGROUND)
-
-        self.posx = start_pos
-
-        self.place(x = self.posx, y = 0)
-
-        self.font = font
-        
+    def __init__(self, controller, font, num_frames, ran_gen) -> None:
+        tk.Label.__init__(self, controller)
         self.ran_gen = ran_gen
-
-        self.min_x = -width
-
-        self.width = width
-
         self.num_frames = num_frames
+        self.screen_width = controller.winfo_screenwidth()
+        self.run_idle_animation = True
 
-        self.speed = 5
+        
 
-        self.number = tk.Label(self, text=self.ran_gen.generate_number())
-        self.number["font"] = self.font
-        self.number.place(rely = 0.5, relx = 0.5, anchor = "center")
-        self.number.configure(borderwidth=width//35, relief = "ridge")
+        #Set number
+        self.configure(text = ran_gen.generate_number())
 
-    def idle_animation(self):
-        new_posx = self.posx - self.speed
+        #set font
+        self["font"] = font
+
+        self.width = self.winfo_reqwidth()
+
+        self.speed_initial = 10
+        self.k = 0.2
+
+    def place_number(self, posx):
+        self.posx = posx
+        self.min_x = -self.width
+        self.place(x = posx, rely = 0.5, anchor = "w")
+
+    def idle_animation(self) -> None:
+        new_posx = self.posx - self.speed_initial
         if new_posx < self.min_x:
-            print(f"old: {new_posx}")
-            new_posx = new_posx + self.width*(self.num_frames)
-            print("moved")
-            print(f"new: {new_posx}")
+            new_posx = new_posx + (self.screen_width + self.width)
+            #update text
+            self["text"] = self.ran_gen.generate_number()
         self.place(x = new_posx, y = 0)
         self.posx = new_posx
-        self.speed -= 0.001
-        if self.speed > 0:
+        self.place(x = self.posx, rely = 0.5, anchor = "w")
+        if self.speed_initial > 0 and self.run_idle_animation:
             self.after(1, self.idle_animation)
-
-
-    def run_animation(self, speed):
-        pass
+    def begin_normal_animation(self, start_time):
+        self.start_time = start_time
+        self.normal_animation()
+    def normal_animation(self) -> None:
+        speed = -exp(self.k*(time.time() - self.start_time)) + self.speed_initial
+        new_posx = self.posx - speed
+        if new_posx < self.min_x:
+            new_posx = new_posx + (self.screen_width + self.width)
+            #update text
+            self["text"] = self.ran_gen.generate_number()
+        self.place(x = new_posx, y = 0)
+        self.posx = new_posx
+        self.place(x = self.posx, rely = 0.5, anchor = "w")
+        print(f"time elapsed = {time.time()-self.start_time}s")
+        print(speed)
+        if speed > 0:
+            self.after(1, self.normal_animation)
         
-
-
-
+    
+        
 
 # third window frame page2
 class Page2(tk.Frame): 
