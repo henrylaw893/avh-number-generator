@@ -15,7 +15,9 @@ class RandomGenerator:
         self.number_list = []
         for number in range(min,max+1):
             if number not in blacklist:
-                if number < 100:
+                if number < 10:
+                    number = "000" + str(number)
+                elif number < 100:
                     number = "00" + str(number)
                 elif number < 1000:
                     number = "0" + str(number)

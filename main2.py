@@ -2,7 +2,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.font as font
 from PIL import ImageTk, Image  
-from time import sleep
+import time
+from threading import Thread
 
 from random_generator import RandomGenerator
 from stack_adt import ArrayStack
@@ -264,45 +265,35 @@ class Page1(tk.Frame):
         bottom_frame = tk.Frame(self, height = bottom_frame_height, width = self.screen_width)
 
         #placement
-        # top_frame.grid(row = 0, column = 0)
-        # number_frame_controller.grid(row = 1, column = 0)
-        # bottom_frame.grid(row = 2, column = 0)
         top_frame.pack()
         number_frame_controller.pack()
         bottom_frame.pack()
+
         #Creating number frames
         #setting dimensions
-        num_frames = 8
+        num_frames = 7
         padding = 0
-        self.number_frame_width = self.screen_width/(num_frames-2) - padding #2 extra frames at the start and end
+        self.number_frame_width = self.screen_width/(num_frames-1) - padding #2 extra frames at the start and end
         self.number_frame_height = number_frame_controller_height - padding
         
-        self.number_frames = dict()
+        #Create number frames
+        self.number_frames = []
         posx = 0 - self.number_frame_width
-        time = 0
+        number_font = tk.font.Font(self.controller,font = "Poppins")
+        number_font["size"] = -(int((self.number_frame_width)/2.5))
         for i in range(num_frames):
-            self.number_frames[i] = (tk.Frame(number_frame_controller, width = self.number_frame_width, height = self.number_frame_height, bg = GENBACKGROUND),
-            posx, time)
-            print(posx)
-            #calculate positions
-            #place
-            self.number_frames[i][0].place(x = posx, y = self.number_frame_height, anchor = "sw")
+            self.number_frames.append(NumberFrame(number_frame_controller, posx, self.number_frame_width, self.number_frame_height, self.ran_gen, number_font, num_frames,1))
             posx += self.number_frame_width
-        
-        print(f"number frame width = {self.number_frame_width}")
-        print()
 
         #pointer
-        self.pointer_line = tk.Frame(number_frame_controller, width = self.screen_width//110, height = number_frame_controller_height/2,
-        borderwidth= self.screen_width//400, relief = "solid")
-        self.pointer_line.place(relx = 0.5, rely = 0.5, anchor = "center")
+        # self.pointer_line = tk.Frame(number_frame_controller, width = self.screen_width//110, height = number_frame_controller_height/2,
+        # borderwidth= self.screen_width//400, relief = "solid")
+        # self.pointer_line.place(relx = 0.5, rely = 0.5, anchor = "center")
 
         #backgrounds
         top_frame["bg"] = GENBACKGROUND
         number_frame_controller["bg"] = GENBACKGROUND
         bottom_frame["bg"] = GENBACKGROUND
-
-        #
 
         #Logo
         avh_logo = Image.open("avh_logo_png.png")
@@ -311,53 +302,90 @@ class Page1(tk.Frame):
         logo = ttk.Label(bottom_frame, image=self.avh_logo_image_tk)
         logo.place(relx = 0.5, rely = 0.5, anchor = "center")
 
-        #create and place numbers
-        self.number_font = tk.font.Font(self.controller,font = "Poppins")
-        padding = 10
-        self.number_font["size"] = -(int((self.number_frame_width - padding)/2.5))
-        for i in range(len(self.number_frames)):
-            frame = self.number_frames[i][0]
-            number = tk.Label(frame, text=self.ran_gen.generate_number())
-            number["font"] = self.number_font
-            number.place(relx = 0.5, rely = 0.5, anchor = "center")
-            number.configure(borderwidth=self.number_frame_width//35, relief = "ridge")
-        
         self.idle_animation()
     
     def idle_animation(self):  
         #Move number frames
-        self.speed = 10
+        self.speed = 3
         self.sleep_time = 1
         self.min_x = 0 - self.number_frame_width
         self.posy = self.number_frame_height
-        self.last_frame = len(self.number_frames)-1
-        self.posx_last_frame = self.number_frames[self.last_frame][1]
+        self.last_frame = self.number_frames[-1]
+        #self.posx_last_frame = self.number_frames[self.last_frame][1]
         #while self.run_idle_animation:
             #calculate new positions
-    def idle_animation_loop(self, event):
-        for _ in range(20):
-            for i in range(len(self.number_frames)):
-                (frame, posx, time) = self.number_frames[i]
-                new_posx = posx - self.speed
-                #update positions of each frame
-                #if the frame is off the left of the screen, move it to the start
-                if new_posx < self.min_x:
-                    new_posx = self.posx_last_frame + self.number_frame_width
-                    self.last_frame = i
-                    self.posx_last_frame = new_posx
-                else:
-                    self.posx_last_frame = self.number_frames[self.last_frame][1]
-                #place
-                frame.place(x = new_posx, y = self.posy, anchor = "sw")
-                #update values
-                self.number_frames[i] = (frame, new_posx, time)
-            sleep(0.5)
+    def idle_animation_loop(self, *args):
+        for frame in self.number_frames:
+            Thread(target = frame.idle_animation).start()
+        
+        # timestart = time.time()
+        # for frame in self.number_frames:
+        #     new_posx = frame.posx - self.speed
+        #     if new_posx < self.min_x:
+        #         new_posx = self.last_frame.posx + self.number_frame_width
+        #         self.last_frame = frame
+        #         print("teleported")
+        #     frame.place(x = new_posx, y = 0)
+        #     frame.posx = new_posx
+        # timeend = time.time()
+        # timetaken = (timeend - timestart)*1000
+        # print(timetaken)
+        # self.speed -= 0.0005
+        # if self.speed > 0:
+        #     self.after(int(1-timetaken), self.idle_animation_loop)
+
                     
     
     def idle_position(self, time):
         speed = -10 #negative for left
         return time*speed
             
+class NumberFrame(tk.Frame):
+    def __init__(self, controller, start_pos, width, height, ran_gen, font, num_frames, speed):
+        tk.Frame.__init__(self, controller)
+
+        self.configure(height = height, width = width, bg = GENBACKGROUND)
+
+        self.posx = start_pos
+
+        self.place(x = self.posx, y = 0)
+
+        self.font = font
+        
+        self.ran_gen = ran_gen
+
+        self.min_x = -width
+
+        self.width = width
+
+        self.num_frames = num_frames
+
+        self.speed = 5
+
+        self.number = tk.Label(self, text=self.ran_gen.generate_number())
+        self.number["font"] = self.font
+        self.number.place(rely = 0.5, relx = 0.5, anchor = "center")
+        self.number.configure(borderwidth=width//35, relief = "ridge")
+
+    def idle_animation(self):
+        new_posx = self.posx - self.speed
+        if new_posx < self.min_x:
+            print(f"old: {new_posx}")
+            new_posx = new_posx + self.width*(self.num_frames)
+            print("moved")
+            print(f"new: {new_posx}")
+        self.place(x = new_posx, y = 0)
+        self.posx = new_posx
+        self.speed -= 0.001
+        if self.speed > 0:
+            self.after(1, self.idle_animation)
+
+
+    def run_animation(self, speed):
+        pass
+        
+
+
 
 
 # third window frame page2
