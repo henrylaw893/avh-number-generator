@@ -245,7 +245,7 @@ class Page1(tk.Frame):
 
         def start_normal_animation(event):
             for frame in self.numbers:
-                Thread(target = frame.begin_normal_animation, args = (time.time(),)).start()
+                Thread(target = frame.begin_normal_animation, args=(time.time(),)).start()
 
         self.bind("<Escape>",escapeKey)
 
@@ -336,9 +336,9 @@ class Number(tk.Label):
         self["font"] = font
 
         self.width = self.winfo_reqwidth()
-
-        self.speed_initial = 10
-        self.k = 0.2
+        self.speed_idle = 0.1
+        self.speed_initial = 22
+        self.k = 0.3
 
     def place_number(self, posx):
         self.posx = posx
@@ -346,32 +346,34 @@ class Number(tk.Label):
         self.place(x = posx, rely = 0.5, anchor = "w")
 
     def idle_animation(self) -> None:
-        new_posx = self.posx - self.speed_initial
+        new_posx = self.posx - self.speed_idle
         if new_posx < self.min_x:
             new_posx = new_posx + (self.screen_width + self.width)
             #update text
             self["text"] = self.ran_gen.generate_number()
-        self.place(x = new_posx, y = 0)
         self.posx = new_posx
         self.place(x = self.posx, rely = 0.5, anchor = "w")
         if self.speed_initial > 0 and self.run_idle_animation:
             self.after(1, self.idle_animation)
     def begin_normal_animation(self, start_time):
         self.start_time = start_time
+        self.speed = self.speed_initial
         self.normal_animation()
+    
     def normal_animation(self) -> None:
-        speed = -exp(self.k*(time.time() - self.start_time)) + self.speed_initial
-        new_posx = self.posx - speed
+        self.speed = (self.speed_initial)*(2.718 ** (-self.k*(time.time() - self.start_time))) - 0.3
+        #self.speed = ((time.time() - self.start_time)) + 1
+        new_posx = self.posx - self.speed
         if new_posx < self.min_x:
             new_posx = new_posx + (self.screen_width + self.width)
+            self.place(x = self.posx, rely = 0.5, anchor = "w")
             #update text
             self["text"] = self.ran_gen.generate_number()
-        self.place(x = new_posx, y = 0)
+        else:
+            self.place(x = self.posx, rely = 0.5, anchor = "w")
         self.posx = new_posx
-        self.place(x = self.posx, rely = 0.5, anchor = "w")
-        print(f"time elapsed = {time.time()-self.start_time}s")
-        print(speed)
-        if speed > 0:
+        #self.speed -= 0.01
+        if self.speed > 0:
             self.after(1, self.normal_animation)
         
     
