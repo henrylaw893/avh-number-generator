@@ -142,7 +142,7 @@ class StartPage(tk.Frame):
         blacklist_entry.pack(pady = 10)
 
         #next page button button
-        onto_generation_button = ttk.Button(centre_frame, text ="Onto generation", 
+        onto_generation_button = ttk.Button(centre_frame, text ="Draw Number", 
         command=lambda : get_blacklist_list(member_num_entry.get(),blacklist_entry.get()))
         onto_generation_button.pack(pady = 30, ipadx = 40, ipady = 20, side = "bottom")
 
@@ -245,7 +245,9 @@ class Page1(tk.Frame):
 
         def start_normal_animation(event):
             for frame in self.numbers:
-                Thread(target = frame.begin_normal_animation, args=(time.time(),)).start()
+                frame.begin_normal_animation(time.time())
+            self.running = True
+            self.run_normal_animation()
 
         self.bind("<Escape>",escapeKey)
 
@@ -258,6 +260,19 @@ class Page1(tk.Frame):
         self.bind("<Down>",stop_idle)
 
         self.bind("<Up>",start_normal_animation)
+
+
+    
+    def run_normal_animation(self):
+        for frame in self.numbers:
+            if frame.speed > 0:
+                frame.normal_animation()
+            else:
+                self.running = False
+        if self.running:
+            self.after(1, self.run_normal_animation)
+        else:
+            self.check_final_pos()
 
     def setup(self, event):
         self.screen_height = self.controller.winfo_screenheight()
@@ -285,11 +300,10 @@ class Page1(tk.Frame):
         #setting dimensions
         num_frames = 7
         self.numbers = []
-        number_font = tk.font.Font(self.controller,font = "Poppins")
-        number_font["size"] = -(int((self.screen_width/(num_frames-1))/2.5))
+        self.number_font = tk.font.Font(self.controller,font = "Poppins")
+        self.number_font["size"] = -(int((self.screen_width/(num_frames-1))/2.5))
         for i in range(num_frames):
-            self.numbers.append(Number(number_frame_controller, number_font, num_frames,self.ran_gen))
-            print(self.numbers[i].width)
+            self.numbers.append(Number(number_frame_controller, self.number_font, num_frames,self.ran_gen))
         
         #setting dimensions
         self.number_width = self.numbers[0].width
@@ -302,9 +316,10 @@ class Page1(tk.Frame):
 
         #Number(number_frame_controller, self.number_frame_width, number_font, num_frames,self.ran_gen)
 
-        self.pointer_line = tk.Frame(number_frame_controller, width = self.screen_width//110, height = number_frame_controller_height/2,
-        borderwidth= self.screen_width//400, relief = "solid")
-        self.pointer_line.place(relx = 0.5, rely = 0.5, anchor = "center")
+        self.pointer_line = tk.Frame(number_frame_controller, width = self.screen_width//110, height = number_frame_controller_height/4,
+        borderwidth= self.screen_width//400, relief = "solid", bg = "red")
+        self.pointer_line.place(relx = 0.5, rely = 0.2, anchor = "n")
+        
 
         #backgrounds
         top_frame["bg"] = GENBACKGROUND
@@ -317,7 +332,56 @@ class Page1(tk.Frame):
         self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
         logo = ttk.Label(bottom_frame, image=self.avh_logo_image_tk)
         logo.place(relx = 0.5, rely = 0.5, anchor = "center")
-            
+
+        #win testing
+        self.create_winner_window("0022")
+
+    def check_final_pos(self):
+        self.pointer_x = self.pointer_line.winfo_rootx()
+        valid_end = False
+        for frame in self.numbers:
+            x_pos = frame.winfo_rootx()
+            val_range = range(x_pos,x_pos + self.number_width)
+            if self.pointer_x in val_range:
+                valid_end = True
+                winning_number = frame
+        if not valid_end:
+            print('invalid')
+            for frame in self.numbers:
+                frame.speed = frame.speed_idle
+            self.running = True
+            self.run_joiner_animation()
+        else:
+            print("valid")
+            winning_number = winning_number["text"]
+            self.after(4000, self.create_winner_window(winning_number))
+    
+    def run_joiner_animation(self):
+        for frame in self.numbers:
+            if frame.speed > 0:
+                frame.joiner_animation()
+            else:
+                self.running = False
+        if self.running:
+            self.after(1, self.run_joiner_animation)
+        else:
+            self.check_final_pos()
+    
+    def create_winner_window(self, winning_number: str):
+        win_frame = ttk.Frame(self)
+        print("winning number is ... " + winning_number)
+        win_frame.place(relx = 0.5, rely = 0.45, anchor = "center", relheight= 0.45, relwidth = 0.6)
+        win_label = ttk.Label(win_frame, font = self.number_font, text = winning_number)
+        win_label.place(relx = 0.5, rely = 0.5, anchor = "center")
+
+class WinFrame(tk.Frame):
+    def __init__(self, controller: tk.Frame, winning_number:str) -> None:
+        tk.Frame.__init__(self, controller)
+
+        #self.configure(relwidth )
+
+
+
 class Number(tk.Label):
 
     def __init__(self, controller, font, num_frames, ran_gen) -> None:
@@ -330,15 +394,15 @@ class Number(tk.Label):
         
 
         #Set number
-        self.configure(text = ran_gen.generate_number())
+        self.configure(text = ran_gen.generate_number(), relief = "raised", borderwidth= 8)
 
         #set font
         self["font"] = font
 
         self.width = self.winfo_reqwidth()
         self.speed_idle = 0.1
-        self.speed_initial = 22
-        self.k = 0.3
+        self.speed_initial = 15
+        self.k = 0.25
 
     def place_number(self, posx):
         self.posx = posx
@@ -358,10 +422,9 @@ class Number(tk.Label):
     def begin_normal_animation(self, start_time):
         self.start_time = start_time
         self.speed = self.speed_initial
-        self.normal_animation()
     
     def normal_animation(self) -> None:
-        self.speed = (self.speed_initial)*(2.718 ** (-self.k*(time.time() - self.start_time))) - 0.3
+        self.speed = (self.speed_initial)*(2.718 ** (-self.k*(time.time() - self.start_time))) - 0.2
         #self.speed = ((time.time() - self.start_time)) + 1
         new_posx = self.posx - self.speed
         if new_posx < self.min_x:
@@ -373,8 +436,21 @@ class Number(tk.Label):
             self.place(x = self.posx, rely = 0.5, anchor = "w")
         self.posx = new_posx
         #self.speed -= 0.01
-        if self.speed > 0:
-            self.after(1, self.normal_animation)
+        # if self.speed > 0:
+        #     self.after(1, self.normal_animation)
+
+    def joiner_animation(self) -> None:
+        new_posx = self.posx - self.speed
+        if new_posx < self.min_x:
+            new_posx = new_posx + (self.screen_width + self.width)
+            self.place(x = self.posx, rely = 0.5, anchor = "w")
+            #update text
+            self["text"] = self.ran_gen.generate_number()
+        else:
+            self.place(x = self.posx, rely = 0.5, anchor = "w")
+        self.posx = new_posx
+        self.speed -= 0.01
+
         
     
         
