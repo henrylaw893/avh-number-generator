@@ -2,7 +2,6 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.font as font
 from PIL import ImageTk, Image  
-import time
 from threading import Thread
 
 from random_generator import RandomGenerator
