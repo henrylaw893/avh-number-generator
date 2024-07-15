@@ -8,6 +8,7 @@ from math import exp
 
 from random_generator import RandomGenerator
 from stack_adt import ArrayStack
+from number_object import NumberObject
 
 #LARGEFONT = tk.font(family = "Verdana", size = 35)
 TITLEFONT = ("Poppins", 40, "bold")
@@ -41,10 +42,10 @@ class tkinterApp(tk.Tk):
         self.frames = {}
 
         start_frame = StartPage(container,self)
-        page1_frame = Page1(container, self, start_frame)
+        page1_frame = GenerationPage(container, self, start_frame)
         
         self.frames[StartPage] = start_frame
-        self.frames[Page1] = page1_frame
+        self.frames[GenerationPage] = page1_frame
         start_frame.grid(row = 0, column = 0, sticky ="nsew")
         page1_frame.grid(row = 0, column = 0, sticky = "nsew")
 
@@ -99,7 +100,7 @@ class StartPage(tk.Frame):
             blacklist_list.append(int(num))
             self.blacklist_list = blacklist_list
             print(self.blacklist_list)
-            controller.show_frame(Page1)
+            controller.show_frame(GenerationPage)
         
         #create frame
         tk.Frame.__init__(self, parent)
@@ -195,11 +196,7 @@ class StartPage(tk.Frame):
     #Function to store the blacklist information
     
 
-		
-
-
-# second window frame page1 
-class Page1(tk.Frame):
+class GenerationPage(tk.Frame):
 	
     def __init__(self, parent, controller, start_page):
 
@@ -221,9 +218,6 @@ class Page1(tk.Frame):
         
         #Pre-setup background set
         self["bg"] = GENBACKGROUND
-        
-        #num0 = tk.Frame()
-
 
         #Action controllers
         def leftKey(event):
@@ -261,8 +255,6 @@ class Page1(tk.Frame):
 
         self.bind("<Up>",start_normal_animation)
 
-
-    
     def run_normal_animation(self):
         for frame in self.numbers:
             if frame.speed > 0:
@@ -303,7 +295,7 @@ class Page1(tk.Frame):
         self.number_font = tk.font.Font(self.controller,font = "Poppins")
         self.number_font["size"] = -(int((self.screen_width/(num_frames-1))/2.5))
         for i in range(num_frames):
-            self.numbers.append(Number(number_frame_controller, self.number_font, num_frames,self.ran_gen))
+            self.numbers.append(NumberObject(number_frame_controller, self.number_font, num_frames,self.ran_gen))
         
         #setting dimensions
         self.number_width = self.numbers[0].width
@@ -333,8 +325,8 @@ class Page1(tk.Frame):
         logo = ttk.Label(bottom_frame, image=self.avh_logo_image_tk)
         logo.place(relx = 0.5, rely = 0.5, anchor = "center")
 
-        #win testing
-        self.create_winner_window("0022")
+        # #win testing
+        # self.create_winner_window("0022")
 
     def check_final_pos(self):
         self.pointer_x = self.pointer_line.winfo_rootx()
@@ -374,111 +366,6 @@ class Page1(tk.Frame):
         win_label = ttk.Label(win_frame, font = self.number_font, text = winning_number)
         win_label.place(relx = 0.5, rely = 0.5, anchor = "center")
 
-class WinFrame(tk.Frame):
-    def __init__(self, controller: tk.Frame, winning_number:str) -> None:
-        tk.Frame.__init__(self, controller)
-
-        #self.configure(relwidth )
-
-
-
-class Number(tk.Label):
-
-    def __init__(self, controller, font, num_frames, ran_gen) -> None:
-        tk.Label.__init__(self, controller)
-        self.ran_gen = ran_gen
-        self.num_frames = num_frames
-        self.screen_width = controller.winfo_screenwidth()
-        self.run_idle_animation = True
-
-        
-
-        #Set number
-        self.configure(text = ran_gen.generate_number(), relief = "raised", borderwidth= 8)
-
-        #set font
-        self["font"] = font
-
-        self.width = self.winfo_reqwidth()
-        self.speed_idle = 0.1
-        self.speed_initial = 15
-        self.k = 0.25
-
-    def place_number(self, posx):
-        self.posx = posx
-        self.min_x = -self.width
-        self.place(x = posx, rely = 0.5, anchor = "w")
-
-    def idle_animation(self) -> None:
-        new_posx = self.posx - self.speed_idle
-        if new_posx < self.min_x:
-            new_posx = new_posx + (self.screen_width + self.width)
-            #update text
-            self["text"] = self.ran_gen.generate_number()
-        self.posx = new_posx
-        self.place(x = self.posx, rely = 0.5, anchor = "w")
-        if self.speed_initial > 0 and self.run_idle_animation:
-            self.after(1, self.idle_animation)
-    def begin_normal_animation(self, start_time):
-        self.start_time = start_time
-        self.speed = self.speed_initial
-    
-    def normal_animation(self) -> None:
-        self.speed = (self.speed_initial)*(2.718 ** (-self.k*(time.time() - self.start_time))) - 0.2
-        #self.speed = ((time.time() - self.start_time)) + 1
-        new_posx = self.posx - self.speed
-        if new_posx < self.min_x:
-            new_posx = new_posx + (self.screen_width + self.width)
-            self.place(x = self.posx, rely = 0.5, anchor = "w")
-            #update text
-            self["text"] = self.ran_gen.generate_number()
-        else:
-            self.place(x = self.posx, rely = 0.5, anchor = "w")
-        self.posx = new_posx
-        #self.speed -= 0.01
-        # if self.speed > 0:
-        #     self.after(1, self.normal_animation)
-
-    def joiner_animation(self) -> None:
-        new_posx = self.posx - self.speed
-        if new_posx < self.min_x:
-            new_posx = new_posx + (self.screen_width + self.width)
-            self.place(x = self.posx, rely = 0.5, anchor = "w")
-            #update text
-            self["text"] = self.ran_gen.generate_number()
-        else:
-            self.place(x = self.posx, rely = 0.5, anchor = "w")
-        self.posx = new_posx
-        self.speed -= 0.01
-
-        
-    
-        
-
-# third window frame page2
-class Page2(tk.Frame): 
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        label = ttk.Label(self, text ="Page 2", font = LARGEFONT)
-        label.grid(row = 0, column = 4, padx = 10, pady = 10)
-
-        # button to show frame 2 with text
-        # layout2
-        button1 = ttk.Button(self, text ="Page 1",
-                            command = lambda : controller.show_frame(Page1))
-
-        # putting the button in its place by 
-        # using grid
-        button1.grid(row = 1, column = 1, padx = 10, pady = 10)
-
-        # button to show frame 3 with text
-        # layout3
-        button2 = ttk.Button(self, text ="Startpage",
-                            command = lambda : controller.show_frame(StartPage))
-
-        # putting the button in its place by
-        # using grid
-        button2.grid(row = 2, column = 1, padx = 10, pady = 10)
 
 # Driver Code
 app = tkinterApp()
