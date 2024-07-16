@@ -18,7 +18,7 @@ class NumberObject:
         self.width = self.label.winfo_reqwidth()
         self.min_x = -self.width/2
 
-        self.padding = (self.screen_width - self.width*(num_frames-2))/(num_frames - 1)
+        self.padding = ((self.screen_width - self.width*(num_frames-2))/(num_frames - 1))
 
     def place_number(self, posx, posy):
         self.posx = posx

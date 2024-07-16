@@ -245,7 +245,7 @@ class GenerationPage(tk.Frame):
     def run_normal_animation(self):
         timeStart = time.time()
         elapsedTime = timeStart - self.startTime
-        dx = 150*pow(2,-0.3*elapsedTime) - 0.8
+        dx = 150*pow(2,-0.5*(elapsedTime)) - 1.8
         #print(f"Elapsed time: {elapsedTime}, dx: {dx}")
         desired_frame_duration = 16
         if dx > 0:
@@ -348,25 +348,16 @@ class GenerationPage(tk.Frame):
                 winning_number = frame
         if not valid_end:
             print('invalid')
-            for frame in self.numbers:
-                frame.speed = frame.speed_idle
-            self.running = True
-            self.run_joiner_animation()
+            self.after(16, self.run_joiner_animation)
         else:
             print("valid")
-            winning_number = winning_number["text"]
+            winning_number = winning_number.label["text"]
             self.after(4000, self.create_winner_window(winning_number))
     
     def run_joiner_animation(self):
-        for frame in self.numbers:
-            if frame.speed > 0:
-                frame.joiner_animation()
-            else:
-                self.running = False
-        if self.running:
-            self.after(1, self.run_joiner_animation)
-        else:
-            self.check_final_pos()
+        for number_object in self.numbers:
+            number_object.move_number(1)
+        self.after(16,self.check_final_pos)
     
     def create_winner_window(self, winning_number: str):
         win_frame = ttk.Frame(self)
