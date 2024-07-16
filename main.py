@@ -243,22 +243,28 @@ class GenerationPage(tk.Frame):
         self.bind("<Up>",start_normal_animation)
 
     def run_normal_animation(self):
-        elapsedTime = time.time() - self.startTime
-        for frame in self.numbers:
-            if frame.speed > 0:
-                frame.normal_animation()
-            else:
-                self.running = False
-        if self.running:
-            self.after(1, self.run_normal_animation)
+        timeStart = time.time()
+        elapsedTime = timeStart - self.startTime
+        dx = 150*pow(2,-0.3*elapsedTime) - 0.8
+        #print(f"Elapsed time: {elapsedTime}, dx: {dx}")
+        desired_frame_duration = 16
+        if dx > 0:
+            for number in self.numbers:
+                    number.move_number(dx)
+            elapsedTimeFrames = (time.time() - timeStart)*1000
+            #print(elapsedTime)
+            sleepTime = int(max(1,(desired_frame_duration-elapsedTimeFrames)))
+            #print(f"Sleeptime: {sleepTime}")
+            self.after(sleepTime,self.run_normal_animation)
         else:
             self.check_final_pos()
+        
     
     def idle_animation(self):
         timeStart = time.time()
         desired_frame_duration = 16
         for number in self.numbers:
-                number.move_number(2)
+                number.move_number(1)
         if self.run_idle_animation:
             elapsedTime = (time.time() - timeStart)*1000
             #print(elapsedTime)
@@ -291,16 +297,16 @@ class GenerationPage(tk.Frame):
 
         #Creating number frames
         #setting dimensions
-        num_frames = 6
+        num_frames = 7
         self.numbers = []
         self.number_font = tk.font.Font(self.controller,font = "Poppins")
-        self.number_font["size"] = -(int((self.screen_width/(num_frames-1))/2.5))
+        self.number_font["size"] = -(int((self.screen_width/(num_frames-2))/2.5))
         for i in range(num_frames):
             self.numbers.append(NumberObject(number_frame_controller, self.number_font, num_frames,self.ran_gen))
         
         #setting dimensions
         self.number_width = self.numbers[0].width
-        padding = (self.screen_width - self.number_width*(num_frames-1))/(num_frames)
+        padding = self.numbers[0].padding
 
         posx = self.number_width//2 + padding
         posy = number_frame_controller_height/2
@@ -335,7 +341,7 @@ class GenerationPage(tk.Frame):
         self.pointer_x = self.pointer_line.winfo_rootx()
         valid_end = False
         for frame in self.numbers:
-            x_pos = frame.winfo_rootx()
+            x_pos = frame.label.winfo_rootx()
             val_range = range(x_pos,x_pos + self.number_width)
             if self.pointer_x in val_range:
                 valid_end = True

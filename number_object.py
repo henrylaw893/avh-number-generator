@@ -18,17 +18,19 @@ class NumberObject:
         self.width = self.label.winfo_reqwidth()
         self.min_x = -self.width/2
 
+        self.padding = (self.screen_width - self.width*(num_frames-2))/(num_frames - 1)
+
     def place_number(self, posx, posy):
         self.posx = posx
         self.posy = posy
         self.canvas.coords(self.window, posx, posy)
 
     def move_number(self, dx):
-        if self.posx >= self.min_x:
+        if self.posx > self.min_x:
             self.posx = self.posx - dx
         else:
-            self.posx = self.screen_width + self.width/2 -dx
-            #self.label["text"] = self.ran_gen.generate_number()
+            self.posx = self.posx + (self.num_frames)*(self.width + self.padding) - dx
+            self.label["text"] = self.ran_gen.generate_number()
         self.canvas.coords(self.window, self.posx, self.posy)
 
     def idle_animation(self) -> None:
