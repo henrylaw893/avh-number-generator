@@ -352,7 +352,7 @@ class GenerationPage(tk.Frame):
         else:
             print("valid")
             winning_number = winning_number.label["text"]
-            self.after(4000, self.create_winner_window(winning_number))
+            self.after(1000, self.create_winner_window(winning_number))
     
     def run_joiner_animation(self):
         for number_object in self.numbers:
