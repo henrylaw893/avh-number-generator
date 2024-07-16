@@ -4,10 +4,12 @@ import time
 class NumberObject(tk.Label):
     def __init__(self, controller, font, num_frames, ran_gen) -> None:
         tk.Label.__init__(self, controller)
+        self.canvas = controller
         self.ran_gen = ran_gen
         self.num_frames = num_frames
         self.screen_width = controller.winfo_screenwidth()
         self.run_idle_animation = True
+        self.window = controller.create_window(window=self)
 
         #Set number
         self.configure(text = ran_gen.generate_number(), relief = "raised", borderwidth= 8)
@@ -16,14 +18,23 @@ class NumberObject(tk.Label):
         self["font"] = font
 
         self.width = self.winfo_reqwidth()
+        self.min_x = -self.width
         self.speed_idle = 0.1
         self.speed_initial = 15
         self.k = 0.25
 
-    def place_number(self, posx):
+    def place_number(self, posx, posy):
         self.posx = posx
-        self.min_x = -self.width
-        self.place(x = posx, rely = 0.5, anchor = "w")
+        self.posy = posy
+        self.canvas.coords(self.window, x = posx, y = posy)
+
+    def move_number(self, dx):
+        if self.posx >= self.min_x:
+            self.posx = self.posx - dx
+        else:
+            self.posx = self.posx + self.screen_width + self.width
+            self["text"] = self.ran_gen.generate_number()
+        self.place(x = self.posx, rely = 0.5, anchor = "w")
 
     def idle_animation(self) -> None:
         new_posx = self.posx - self.speed_idle

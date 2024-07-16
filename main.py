@@ -197,24 +197,14 @@ class StartPage(tk.Frame):
     
 
 class GenerationPage(tk.Frame):
-	
     def __init__(self, parent, controller, start_page):
-
         tk.Frame.__init__(self, parent)
-
         self.start_page = start_page
         self.controller = controller
         self.run_idle_animation = True
 
         def return_button_click(event):
             controller.show_frame(StartPage)
-
-        def generate_button_click(event):
-            ran_gen = RandomGenerator(1,start_page.member_num_input,start_page.blacklist_list)
-            number = ttk.Label(self, text=str(int(ran_gen.generate_number())))
-            number.grid(row = 0, column = 0)
-            self.focus_set()
-
         
         #Pre-setup background set
         self["bg"] = GENBACKGROUND
@@ -230,12 +220,12 @@ class GenerationPage(tk.Frame):
             controller.destroy()
 
         def stop_idle(event):
-            for number in self.numbers:
-                number.run_idle_animation = not(number.run_idle_animation)
+            self.run_idle_animation = False
 
+        # TODO: Call move function on number object
         def start_idle(event):
-            for frame in self.numbers:
-                Thread(target = frame.idle_animation).start()
+            self.run_idle_animation = True
+            self.idle_animation()
 
         def start_normal_animation(event):
             for frame in self.numbers:
@@ -244,8 +234,6 @@ class GenerationPage(tk.Frame):
             self.run_normal_animation()
 
         self.bind("<Escape>",escapeKey)
-
-        self.bind("<Return>",generate_button_click)
 
         self.bind("<space>",self.setup)
 
@@ -265,6 +253,12 @@ class GenerationPage(tk.Frame):
             self.after(1, self.run_normal_animation)
         else:
             self.check_final_pos()
+    
+    def idle_animation(self):
+        for number in self.numbers:
+                number.move_number(10)
+        if self.run_idle_animation:
+            self.after(1,self.idle_animation)
 
     def setup(self, event):
         self.screen_height = self.controller.winfo_screenheight()
@@ -280,7 +274,7 @@ class GenerationPage(tk.Frame):
 
         #creation
         top_frame = tk.Frame(self, height = top_frame_height, width = self.screen_width)
-        number_frame_controller = tk.Frame(self, height = number_frame_controller_height, width = self.screen_width)
+        number_frame_controller = tk.Canvas(self, height = number_frame_controller_height, width = self.screen_width)
         bottom_frame = tk.Frame(self, height = bottom_frame_height, width = self.screen_width)
 
         #placement
