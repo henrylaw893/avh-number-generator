@@ -228,9 +228,8 @@ class GenerationPage(tk.Frame):
             self.idle_animation()
 
         def start_normal_animation(event):
-            for frame in self.numbers:
-                frame.begin_normal_animation(time.time())
-            self.running = True
+            self.run_idle_animation = False
+            self.startTime = time.time()
             self.run_normal_animation()
 
         self.bind("<Escape>",escapeKey)
@@ -244,6 +243,7 @@ class GenerationPage(tk.Frame):
         self.bind("<Up>",start_normal_animation)
 
     def run_normal_animation(self):
+        elapsedTime = time.time() - self.startTime
         for frame in self.numbers:
             if frame.speed > 0:
                 frame.normal_animation()
@@ -255,10 +255,17 @@ class GenerationPage(tk.Frame):
             self.check_final_pos()
     
     def idle_animation(self):
+        timeStart = time.time()
+        desired_frame_duration = 16
         for number in self.numbers:
-                number.move_number(10)
+                number.move_number(2)
         if self.run_idle_animation:
-            self.after(1,self.idle_animation)
+            elapsedTime = (time.time() - timeStart)*1000
+            #print(elapsedTime)
+            sleepTime = int(max(1,(desired_frame_duration-elapsedTime)))
+            #print(f"Sleeptime: {sleepTime}")
+            self.after(sleepTime,self.idle_animation)
+        
 
     def setup(self, event):
         self.screen_height = self.controller.winfo_screenheight()
@@ -284,7 +291,7 @@ class GenerationPage(tk.Frame):
 
         #Creating number frames
         #setting dimensions
-        num_frames = 7
+        num_frames = 6
         self.numbers = []
         self.number_font = tk.font.Font(self.controller,font = "Poppins")
         self.number_font["size"] = -(int((self.screen_width/(num_frames-1))/2.5))
@@ -295,16 +302,18 @@ class GenerationPage(tk.Frame):
         self.number_width = self.numbers[0].width
         padding = (self.screen_width - self.number_width*(num_frames-1))/(num_frames)
 
-        posx = 0 - self.number_width
+        posx = self.number_width//2 + padding
+        posy = number_frame_controller_height/2
         for number in self.numbers:
-            number.place_number(posx)
+            number.place_number(posx, posy)
             posx += self.number_width + padding
 
         #Number(number_frame_controller, self.number_frame_width, number_font, num_frames,self.ran_gen)
 
         self.pointer_line = tk.Frame(number_frame_controller, width = self.screen_width//110, height = number_frame_controller_height/4,
         borderwidth= self.screen_width//400, relief = "solid", bg = "red")
-        self.pointer_line.place(relx = 0.5, rely = 0.2, anchor = "n")
+        self.pointer_window = number_frame_controller.create_window(self.screen_width//2, number_frame_controller_height//7, window=self.pointer_line)
+        #number_frame_controller.coords(self.pointer_window,screen_)
         
 
         #backgrounds
