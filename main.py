@@ -292,11 +292,10 @@ class GenerationPage(tk.Frame):
             blacklist_list = []
             for row in blacklist_reader:
                 for number_string in row:
-                    blacklist_list.append(int(number_string))
+                    if number_string != "":
+                        blacklist_list.append(int(number_string))
         return blacklist_list
 
-
-        
     def setup(self, event):
         self.screen_height = self.controller.winfo_screenheight()
         self.screen_width = self.controller.winfo_screenwidth()
