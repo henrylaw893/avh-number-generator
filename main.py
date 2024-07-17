@@ -4,7 +4,7 @@ import tkinter.font as font
 from PIL import ImageTk, Image  
 import time
 from threading import Thread
-from math import exp
+from csv import reader
 
 from random_generator import RandomGenerator
 from stack_adt import ArrayStack
@@ -231,8 +231,6 @@ class GenerationPage(tk.Frame):
 
         self.bind("<Escape>",escapeKey)
 
-        
-
         self.bind("<space>",self.space_pressed)
 
         self.bind("<Right>", start_idle)
@@ -284,12 +282,28 @@ class GenerationPage(tk.Frame):
             sleepTime = int(max(1,(desired_frame_duration-elapsedTime)))
             #print(f"Sleeptime: {sleepTime}")
             self.after(sleepTime,self.idle_animation)
+
+    def get_blacklist(self, filepath: str) -> list:
+        """
+        hi
+        """
+        with open(filepath, newline='') as blacklist_csv_file:
+            blacklist_reader = reader(blacklist_csv_file)
+            blacklist_list = []
+            for row in blacklist_reader:
+                for number_string in row:
+                    blacklist_list.append(int(number_string))
+        return blacklist_list
+
+
         
     def setup(self, event):
         self.screen_height = self.controller.winfo_screenheight()
         self.screen_width = self.controller.winfo_screenwidth()
 
-        self.ran_gen = RandomGenerator(1,self.start_page.member_num_input,self.start_page.blacklist_list)
+        filepath = "blacklist.csv"
+        blacklist = self.get_blacklist(filepath)
+        self.ran_gen = RandomGenerator(1,self.start_page.member_num_input,blacklist)
 
         #Creating base frames
         #Sizing
