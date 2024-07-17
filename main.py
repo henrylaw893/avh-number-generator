@@ -280,9 +280,9 @@ class GenerationPage(tk.Frame):
                 number.move_number(1)
         if self.run_idle_animation:
             elapsedTime = (time.time() - timeStart)*1000
-            print(f"elapsed time: {elapsedTime}")
+            #print(f"elapsed time: {elapsedTime}")
             sleepTime = int(max(1,(desired_frame_duration-elapsedTime)))
-            print(f"Sleeptime: {sleepTime}")
+            #print(f"Sleeptime: {sleepTime}")
             self.after(sleepTime,self.idle_animation)
         
     def setup(self, event):
@@ -356,10 +356,8 @@ class GenerationPage(tk.Frame):
                 valid_end = True
                 winning_number = frame
         if not valid_end:
-            print('invalid')
             self.after(16, self.run_joiner_animation)
         else:
-            print("valid")
             winning_number = winning_number.label["text"]
             self.after(1000, self.show_winner_window(winning_number))
     
