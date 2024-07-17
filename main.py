@@ -9,6 +9,7 @@ from math import exp
 from random_generator import RandomGenerator
 from stack_adt import ArrayStack
 from number_object import NumberObject
+from win_window import WinWindow
 
 #LARGEFONT = tk.font(family = "Verdana", size = 35)
 TITLEFONT = ("Poppins", 40, "bold")
@@ -202,6 +203,7 @@ class GenerationPage(tk.Frame):
         self.start_page = start_page
         self.controller = controller
         self.run_idle_animation = True
+        self.space_times_pressed = 0
 
         def return_button_click(event):
             controller.show_frame(StartPage)
@@ -225,22 +227,34 @@ class GenerationPage(tk.Frame):
         # TODO: Call move function on number object
         def start_idle(event):
             self.run_idle_animation = True
-            self.idle_animation()
-
-        def start_normal_animation(event):
-            self.run_idle_animation = False
-            self.startTime = time.time()
-            self.run_normal_animation()
+            self.idle_animation()            
 
         self.bind("<Escape>",escapeKey)
 
-        self.bind("<space>",self.setup)
+        
+
+        self.bind("<space>",self.space_pressed)
 
         self.bind("<Right>", start_idle)
 
         self.bind("<Down>",stop_idle)
 
-        self.bind("<Up>",start_normal_animation)
+    def space_pressed(self, event):
+        if self.space_times_pressed == 0:
+            self.setup(event)
+            self.space_times_pressed += 1
+        elif self.space_times_pressed == 1:
+            self.run_idle_animation = False
+            self.startTime = time.time()
+            self.run_normal_animation()
+            self.space_times_pressed += 1
+        elif self.space_times_pressed == 2:
+            #Close winning window, bring back to idle animation
+            self.win_window.hide()
+            self.win_window = None
+            self.run_idle_animation = True
+            self.idle_animation()
+            self.space_times_pressed = 1
 
     def run_normal_animation(self):
         timeStart = time.time()
@@ -259,7 +273,6 @@ class GenerationPage(tk.Frame):
         else:
             self.check_final_pos()
         
-    
     def idle_animation(self):
         timeStart = time.time()
         desired_frame_duration = 16
@@ -267,12 +280,11 @@ class GenerationPage(tk.Frame):
                 number.move_number(1)
         if self.run_idle_animation:
             elapsedTime = (time.time() - timeStart)*1000
-            #print(elapsedTime)
+            print(f"elapsed time: {elapsedTime}")
             sleepTime = int(max(1,(desired_frame_duration-elapsedTime)))
-            #print(f"Sleeptime: {sleepTime}")
+            print(f"Sleeptime: {sleepTime}")
             self.after(sleepTime,self.idle_animation)
         
-
     def setup(self, event):
         self.screen_height = self.controller.winfo_screenheight()
         self.screen_width = self.controller.winfo_screenwidth()
@@ -318,9 +330,7 @@ class GenerationPage(tk.Frame):
 
         self.pointer_line = tk.Frame(number_frame_controller, width = self.screen_width//110, height = number_frame_controller_height/4,
         borderwidth= self.screen_width//400, relief = "solid", bg = "red")
-        self.pointer_window = number_frame_controller.create_window(self.screen_width//2, number_frame_controller_height//7, window=self.pointer_line)
-        #number_frame_controller.coords(self.pointer_window,screen_)
-        
+        self.pointer_window = number_frame_controller.create_window(self.screen_width//2, number_frame_controller_height//7, window=self.pointer_line)        
 
         #backgrounds
         top_frame["bg"] = GENBACKGROUND
@@ -334,8 +344,7 @@ class GenerationPage(tk.Frame):
         logo = ttk.Label(bottom_frame, image=self.avh_logo_image_tk)
         logo.place(relx = 0.5, rely = 0.5, anchor = "center")
 
-        # #win testing
-        # self.create_winner_window("0022")
+        self.idle_animation()
 
     def check_final_pos(self):
         self.pointer_x = self.pointer_line.winfo_rootx()
@@ -352,20 +361,20 @@ class GenerationPage(tk.Frame):
         else:
             print("valid")
             winning_number = winning_number.label["text"]
-            self.after(1000, self.create_winner_window(winning_number))
+            self.after(1000, self.show_winner_window(winning_number))
     
     def run_joiner_animation(self):
         for number_object in self.numbers:
             number_object.move_number(1)
         self.after(16,self.check_final_pos)
     
-    def create_winner_window(self, winning_number: str):
-        win_frame = ttk.Frame(self)
-        print("winning number is ... " + winning_number)
-        win_frame.place(relx = 0.5, rely = 0.45, anchor = "center", relheight= 0.45, relwidth = 0.6)
-        win_label = ttk.Label(win_frame, font = self.number_font, text = winning_number)
-        win_label.place(relx = 0.5, rely = 0.5, anchor = "center")
-
+    def show_winner_window(self, winning_number: str):
+        #Create winning frame
+        winning_font = tk.font.Font(self.controller,font = "Poppins")
+        winning_font["size"] = self.screen_height//3
+        border_width = self.screen_width//40
+        self.win_window = WinWindow(self, font = winning_font, borderwidth=border_width, relief="solid")
+        self.win_window.show_winner(winning_number=winning_number)
 
 # Driver Code
 app = tkinterApp()
