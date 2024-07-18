@@ -321,7 +321,7 @@ class GenerationPage(tk.Frame):
         club17_text.place(relx = 0.5, rely = 0.7, anchor="center")
         #member_draw_text.place(relx=0.5, rely=0.45, anchor="n")
         #member_draw_text.lower(club17_text)
-        #self.idle_animation()
+        self.idle_animation()
 
     def space_pressed(self, event):
         if self.space_times_pressed == 0:
