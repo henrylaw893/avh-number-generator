@@ -271,17 +271,16 @@ class GenerationPage(tk.Frame):
         for i in range(num_boxes):
             self.numbers.append(NumberBox(number_canvas, self.number_font, num_boxes, self.screen_width, number_canvas_height, self.ran_gen))
         
-        
         #setting dimensions
-        self.number_width = self.numbers[0].get_width()
+        self.number_box_width = self.numbers[0].get_width()
         padding = self.numbers[0].get_padding()
 
         #Placing in initial positions
-        posx = 0
+        posx = -self.number_box_width
         posy = number_canvas_height/2
         for number in self.numbers:
             number.place_number(posx, posy)
-            posx += self.number_width + padding
+            posx = posx + self.number_box_width + padding
 
         #Creating pointer
         triangle_width = self.screen_width//15
@@ -321,7 +320,7 @@ class GenerationPage(tk.Frame):
         club17_text.place(relx = 0.5, rely = 0.7, anchor="center")
         #member_draw_text.place(relx=0.5, rely=0.45, anchor="n")
         #member_draw_text.lower(club17_text)
-        self.idle_animation()
+        #self.idle_animation()
 
     def space_pressed(self, event):
         if self.space_times_pressed == 0:
@@ -388,16 +387,16 @@ class GenerationPage(tk.Frame):
     def check_final_pos(self):
         self.pointer_x = self.screen_width//2
         valid_end = False
-        for frame in self.numbers:
-            x_pos = frame.label.winfo_rootx()
-            val_range = range(x_pos,x_pos + self.number_width)
+        for number_box in self.numbers:
+            x_pos = int(number_box.get_xpos())
+            val_range = range(x_pos,x_pos + int(self.number_box_width))
             if self.pointer_x in val_range:
                 valid_end = True
-                winning_number = frame
+                winning_number = number_box
         if not valid_end:
             self.after(16, self.run_joiner_animation)
         else:
-            winning_number = winning_number.label["text"]
+            winning_number = winning_number.get_number_as_str()
             self.after(1000, self.show_winner_window(winning_number))
     
     def run_joiner_animation(self):
