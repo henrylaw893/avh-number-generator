@@ -12,7 +12,7 @@ FR_NOT_ENUM = 0x20
 
 from random_generator import RandomGenerator
 from stack_adt import ArrayStack
-from number_object import NumberObject
+from number_box import NumberBox
 from win_window import WinWindow
 
 def resource_path(relative_path):
@@ -235,6 +235,93 @@ class GenerationPage(tk.Frame):
 
         self.bind("<Down>",stop_idle)
 
+    def setup(self, event):
+        self.screen_height = self.controller.winfo_screenheight()
+        self.screen_width = self.controller.winfo_screenwidth()
+
+        print(f"width: {self.screen_width}, height: {self.screen_height}")
+
+        filepath = resource_path("./data/blacklist.csv")
+        blacklist = self.get_blacklist(filepath)
+        self.ran_gen = RandomGenerator(1,self.start_page.member_num_input,blacklist)
+
+        #Creating base frames
+        #Sizing
+        top_frame_height = self.screen_height/4.5
+        number_canvas_height = self.screen_height/2.5
+        bottom_frame_height = self.screen_height - top_frame_height - number_canvas_height
+
+        #creation
+        top_frame = tk.Frame(self, height = top_frame_height, width = self.screen_width)
+        number_canvas = tk.Canvas(self, height = number_canvas_height, width = self.screen_width, borderwidth=0, highlightthickness=0)
+        bottom_frame = tk.Frame(self, height = bottom_frame_height, width = self.screen_width)
+
+        #placement
+        top_frame.pack()
+        number_canvas.pack()
+        bottom_frame.pack()
+
+        #Creating number frames
+        #setting dimensions
+        num_boxes = 7
+        self.numbers = []
+        self.number_font = tk.font.Font(self.controller,font = "Segoe")
+        self.number_font["size"] = -(int((self.screen_width/(num_boxes-2))/2.5))
+        
+        for i in range(num_boxes):
+            self.numbers.append(NumberBox(number_canvas, self.number_font, num_boxes, self.screen_width, number_canvas_height, self.ran_gen))
+        
+        #setting dimensions
+        self.number_box_width = self.numbers[0].get_width()
+        padding = self.numbers[0].get_padding()
+
+        #Placing in initial positions
+        posx = -self.number_box_width
+        posy = number_canvas_height/2
+        for number in self.numbers:
+            number.place_number(posx, posy)
+            posx = posx + self.number_box_width + padding
+
+        #Creating pointer
+        triangle_width = self.screen_width//15
+        triangle_height = self.screen_height//15
+        triangle_posy = number_canvas_height//11
+        x0 = self.screen_width/2 - triangle_width//2
+        y0 = triangle_posy
+        x1 = self.screen_width/2 + triangle_width//2
+        y1 = triangle_posy
+        x2 = self.screen_width/2
+        y2 = triangle_posy + triangle_height
+
+        points = [x0,y0,x1,y1,x2,y2]
+        
+        self.pointer_line = number_canvas.create_polygon(points,
+        width= self.screen_width//200, outline = "black", fill = "white")
+        #self.pointer_window = number_canvas.create_window(self.screen_width//2, number_canvas_height//7, window=self.pointer_line)        
+
+        #backgrounds
+        top_frame["bg"] = GENBACKGROUND
+        number_canvas["bg"] = GENBACKGROUND
+        bottom_frame["bg"] = GENBACKGROUND
+
+        #Logo
+        avh_logo_filepath = resource_path("./data/avh_logo_png.png")
+        avh_logo = Image.open(avh_logo_filepath)
+        avh_logo = avh_logo.resize((int(self.screen_width/2), int(bottom_frame_height/1)))
+        self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
+        logo = ttk.Label(bottom_frame, image=self.avh_logo_image_tk)
+        logo.place(relx = 0.5, rely = 0.3, anchor = "center")
+
+        #Top text
+        club17_font = tk.font.Font(self.controller,font = "Poppins")
+        club17_font["size"] = int(self.screen_height//10)
+        #club17_text = tk.Text(top_frame, font = club17_font, bg = GENBACKGROUND, fg="white")
+        club17_text = tk.Label(top_frame, text="Club17 Member Draw", font = club17_font, bg = GENBACKGROUND, fg="white")
+        club17_text.place(relx = 0.5, rely = 0.7, anchor="center")
+        #member_draw_text.place(relx=0.5, rely=0.45, anchor="n")
+        #member_draw_text.lower(club17_text)
+        #self.idle_animation()
+
     def space_pressed(self, event):
         if self.space_times_pressed == 0:
             self.setup(event)
@@ -251,6 +338,24 @@ class GenerationPage(tk.Frame):
             self.run_idle_animation = True
             self.idle_animation()
             self.space_times_pressed = 1
+
+    def get_blacklist(self, filepath: str) -> list:
+        """
+        hi
+        """
+        # Get the directory path of the current script (__file__)
+        script_dir = os.path.dirname(sys.argv[0])
+
+        # Construct the path to excel_data.csv relative to the script's directory
+        csv_file_path = os.path.join(script_dir, 'blacklist.csv')
+        with open(csv_file_path, newline='') as blacklist_csv_file:
+            blacklist_reader = reader(blacklist_csv_file)
+            blacklist_list = []
+            for row in blacklist_reader:
+                for number_string in row:
+                    if number_string != "":
+                        blacklist_list.append(int(number_string))
+        return blacklist_list
 
     def run_normal_animation(self):
         timeStart = time.time()
@@ -279,121 +384,19 @@ class GenerationPage(tk.Frame):
             sleepTime = round(max(1,(desired_frame_duration-elapsedTime)))
             self.after(sleepTime,self.idle_animation)
 
-    def get_blacklist(self, filepath: str) -> list:
-        """
-        hi
-        """
-        # Get the directory path of the current script (__file__)
-        script_dir = os.path.dirname(sys.argv[0])
-
-        # Construct the path to excel_data.csv relative to the script's directory
-        csv_file_path = os.path.join(script_dir, 'blacklist.csv')
-        with open(csv_file_path, newline='') as blacklist_csv_file:
-            blacklist_reader = reader(blacklist_csv_file)
-            blacklist_list = []
-            for row in blacklist_reader:
-                for number_string in row:
-                    if number_string != "":
-                        blacklist_list.append(int(number_string))
-        return blacklist_list
-
-    def setup(self, event):
-        self.screen_height = self.controller.winfo_screenheight()
-        self.screen_width = self.controller.winfo_screenwidth()
-
-        filepath = resource_path("./data/blacklist.csv")
-        blacklist = self.get_blacklist(filepath)
-        self.ran_gen = RandomGenerator(1,self.start_page.member_num_input,blacklist)
-
-        #Creating base frames
-        #Sizing
-        top_frame_height = self.screen_height/4.5
-        number_frame_controller_height = self.screen_height/2.5
-        bottom_frame_height = self.screen_height - top_frame_height - number_frame_controller_height
-
-        #creation
-        top_frame = tk.Frame(self, height = top_frame_height, width = self.screen_width)
-        number_frame_controller = tk.Canvas(self, height = number_frame_controller_height, width = self.screen_width, borderwidth=0, highlightthickness=0)
-        bottom_frame = tk.Frame(self, height = bottom_frame_height, width = self.screen_width)
-
-        #placement
-        top_frame.pack()
-        number_frame_controller.pack()
-        bottom_frame.pack()
-
-        #Creating number frames
-        #setting dimensions
-        num_frames = 7
-        self.numbers = []
-        self.number_font = tk.font.Font(self.controller,font = "Segoe")
-        self.number_font["size"] = -(int((self.screen_width/(num_frames-2))/2.5))
-        for i in range(num_frames):
-            self.numbers.append(NumberObject(number_frame_controller, self.number_font, num_frames,self.ran_gen))
-        
-        #setting dimensions
-        self.number_width = self.numbers[0].width
-        padding = self.numbers[0].padding
-
-        posx = self.number_width//2 + padding
-        posy = number_frame_controller_height/2
-        for number in self.numbers:
-            number.place_number(posx, posy)
-            posx += self.number_width + padding
-
-        #Creating pointer
-        # TODO: Make pointer a triangle
-        triangle_width = self.screen_width//15
-        triangle_height = self.screen_height//15
-        triangle_posy = number_frame_controller_height//11
-        x0 = self.screen_width//2 - triangle_width//2
-        y0 = triangle_posy
-        x1 = self.screen_width//2 + triangle_width//2
-        y1 = triangle_posy
-        x2 = self.screen_width//2
-        y2 = triangle_posy + triangle_height
-
-        points = [x0,y0,x1,y1,x2,y2]
-        
-        self.pointer_line = number_frame_controller.create_polygon(points,
-        width= self.screen_width//200, outline = "black", fill = "white")
-        #self.pointer_window = number_frame_controller.create_window(self.screen_width//2, number_frame_controller_height//7, window=self.pointer_line)        
-
-        #backgrounds
-        top_frame["bg"] = GENBACKGROUND
-        number_frame_controller["bg"] = GENBACKGROUND
-        bottom_frame["bg"] = GENBACKGROUND
-
-        #Logo
-        avh_logo_filepath = resource_path("./data/avh_logo_png.png")
-        avh_logo = Image.open(avh_logo_filepath)
-        avh_logo = avh_logo.resize((int(self.screen_width/2), int(bottom_frame_height/1)))
-        self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
-        logo = ttk.Label(bottom_frame, image=self.avh_logo_image_tk)
-        logo.place(relx = 0.5, rely = 0.3, anchor = "center")
-
-        #Top text
-        club17_font = tk.font.Font(self.controller,font = "Poppins")
-        club17_font["size"] = int(self.screen_height//10)
-        club17_text = tk.Label(top_frame, text="Club17 Member Draw", font = club17_font, bg = GENBACKGROUND, fg="white")
-        #member_draw_text = tk.Label(top_frame, text="Member Draw", font = club17_font, bg = GENBACKGROUND, fg="white")
-        club17_text.place(relx = 0.5, rely = 0.7, anchor="center")
-        #member_draw_text.place(relx=0.5, rely=0.45, anchor="n")
-        #member_draw_text.lower(club17_text)
-        self.idle_animation()
-
     def check_final_pos(self):
         self.pointer_x = self.screen_width//2
         valid_end = False
-        for frame in self.numbers:
-            x_pos = frame.label.winfo_rootx()
-            val_range = range(x_pos,x_pos + self.number_width)
+        for number_box in self.numbers:
+            x_pos = int(number_box.get_xpos())
+            val_range = range(x_pos,x_pos + int(self.number_box_width))
             if self.pointer_x in val_range:
                 valid_end = True
-                winning_number = frame
+                winning_number = number_box
         if not valid_end:
             self.after(16, self.run_joiner_animation)
         else:
-            winning_number = winning_number.label["text"]
+            winning_number = winning_number.get_number_as_str()
             self.after(1000, self.show_winner_window(winning_number))
     
     def run_joiner_animation(self):
@@ -410,7 +413,5 @@ class GenerationPage(tk.Frame):
         self.win_window.show_winner(winning_number=winning_number)
 
 # Driver Code
-
-
 app = tkinterApp()
 app.mainloop()
