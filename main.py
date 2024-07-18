@@ -159,7 +159,7 @@ class StartPage(tk.Frame):
         height = 450
         instruction_frame = tk.LabelFrame(self, 
         width = width, height = height, relief = "raised", borderwidth=8)
-        instruction_frame.place(relx = 0.754, rely = 0.29)
+        instruction_frame.place(relx = 0.7, rely = 0.4)
         # instruction_frame_x = instruction_frame.winfo_rootx()
         # instruction_frame_y = instruction_frame.winfo_rooty()
         
@@ -174,7 +174,7 @@ class StartPage(tk.Frame):
         instruction_text = tk.Label(instruction_frame, font = INSTRUCTIONFONT, text = "Press escape key to close program." +
         "\nEnter information and then press generate button\nto proceed to the generation screen.\n" +
         "Plug in HDMI adapter once on generation screen.\n" + 
-        "Press enter on the next screen to generate number.\nPress the left arrow key to return to this page.")
+        "Press space on the next screen to generate number.\nPress the left arrow key to return to this page.")
         instruction_text.pack()
         # instruction_frame.tkraise()
 
