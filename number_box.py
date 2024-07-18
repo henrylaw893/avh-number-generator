@@ -24,30 +24,37 @@ class NumberBox:
 
         self.canvas_text = canvas.create_text(0,0, text = ran_gen.generate_number(), fill = "black", font = font)
 
+        self.inner_padding = self.rectangle_width/20
+        # TODO: Use a command like this to get the width and height of a box
+        self.text_height = 130
+        self.text_width = 100
+        #print(self.canvas.itemcget(self.canvas_text, "text"))
+        #print(self.canvas.itemconfigure(self.canvas_text))
+
 
     def place_number(self, posx: float, posy: float) -> None:
         """
-        Places the middle of the number box at (posx, posy)
+        Places the middle left side of the number box at (posx, posy)
         """
-        self.posx = posx
-        self.posy = posy
         #Top left corner of rectangle is placed at coordinates
-        posx_rectangle = posx - self.rectangle_width/2
-        posy_rectangle = posy - self.rectangle_height/2
-        self.canvas.coords(self.canvas_rectangle, posx_rectangle, posy_rectangle, posx_rectangle+self.rectangle_width, posy_rectangle+self.rectangle_height)
-        #Text is placed in middle
-        self.canvas.coords(self.canvas_text, posx, posy)
+        self.posx_rectangle = posx
+        self.posy_rectangle = posy - self.rectangle_height/2
+        self.canvas.moveto(self.canvas_rectangle, self.posx_rectangle, self.posy_rectangle)
+        #Text is placed top left
+        self.posx_text = posx + self.inner_padding
+        self.posy_text = posy - self.text_height/2
+        self.canvas.moveto(self.canvas_text, self.posx_text, self.posy_text)
 
     def move_number(self, dx):
-        if self.posx > self.min_x:
-            self.posx = self.posx - dx
-            self.canvas.coords(self.canvas_text, self.posx, self.posy)
+        if self.posx_rectangle > self.min_x:
+            self.posx_rectangle = self.posx_rectangle - dx
+            self.posx_text = self.posx_text - dx
         else:
-            self.posx = self.posx + (self.num_boxes)*(self.rectangle_width + self.padding) - dx
-            self.canvas_text = self.canvas.create_text(self.posx, self.posy, text = self.ran_gen.generate_number(), fill = "black", font = self.font)
-        posx_rectangle = self.posx - self.rectangle_width/2
-        posy_rectangle = self.posy - self.rectangle_height/2
-        self.canvas.coords(self.canvas_rectangle, posx_rectangle, posy_rectangle, posx_rectangle+self.rectangle_width, posy_rectangle+self.rectangle_height)
+            self.posx_rectangle = self.posx_rectangle + (self.num_boxes)*(self.rectangle_width + self.padding) - dx
+            self.posx_text = self.posx_text + (self.num_boxes)*(self.rectangle_width + self.padding) - dx
+            #self.canvas_text = self.canvas.create_text(self.posx, self.posy, text = self.ran_gen.generate_number(), fill = "black", font = self.font)
+        self.canvas.moveto(self.canvas_text, self.posx_text, self.posy_text)
+        self.canvas.moveto(self.canvas_rectangle, self.posx_rectangle, self.posy_rectangle)
     
     def get_width(self) -> float:
         """
@@ -60,3 +67,9 @@ class NumberBox:
         Return padding value of the number box (int)
         """
         return self.padding
+
+    def get_number_as_str(self) -> str:
+        """
+        Return current number being displayed by number box
+        """
+        return self.canvas.itemcget(self.canvas_text, "text")

@@ -316,8 +316,8 @@ class GenerationPage(tk.Frame):
         #Top text
         club17_font = tk.font.Font(self.controller,font = "Poppins")
         club17_font["size"] = int(self.screen_height//10)
+        #club17_text = tk.Text(top_frame, font = club17_font, bg = GENBACKGROUND, fg="white")
         club17_text = tk.Label(top_frame, text="Club17 Member Draw", font = club17_font, bg = GENBACKGROUND, fg="white")
-        #member_draw_text = tk.Label(top_frame, text="Member Draw", font = club17_font, bg = GENBACKGROUND, fg="white")
         club17_text.place(relx = 0.5, rely = 0.7, anchor="center")
         #member_draw_text.place(relx=0.5, rely=0.45, anchor="n")
         #member_draw_text.lower(club17_text)
