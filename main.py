@@ -115,8 +115,8 @@ class StartPage(tk.Frame):
         self.grid_rowconfigure([0,1,2,3],weight = 1)
         
         #Create base frames
-        top_frame = tk.Frame(self, width=700, height = 200)
-        top_frame.grid(row = 0, column = 0)
+        top_canvas = tk.Frame(self, width=700, height = 200)
+        top_canvas.grid(row = 0, column = 0)
         centre_frame = tk.Frame(self, width = 800, height = 650)
         centre_frame.grid(row = 1, column = 0)
         
@@ -151,7 +151,7 @@ class StartPage(tk.Frame):
         quit_button.grid(row = 3, column = 0)
 
         #Title
-        title_label = tk.Label(top_frame, font = TITLEFONT, text = "Arcadia Village Hotel\nClub17 Member Draw", justify = "center")
+        title_label = tk.Label(top_canvas, font = TITLEFONT, text = "Arcadia Village Hotel\nClub17 Member Draw", justify = "center")
         title_label.pack(fill = tk.BOTH, expand = 1)
 
         #Instructions
@@ -244,19 +244,19 @@ class GenerationPage(tk.Frame):
 
         #Creating base frames
         #Sizing
-        top_frame_height = self.screen_height/4.5
+        top_canvas_height = self.screen_height/4.5
         number_canvas_height = self.screen_height/2.5
-        bottom_frame_height = self.screen_height - top_frame_height - number_canvas_height
+        bottom_canvas_height = self.screen_height - top_canvas_height - number_canvas_height
 
         #creation
-        top_frame = tk.Frame(self, height = top_frame_height, width = self.screen_width)
+        top_canvas = tk.Canvas(self, height = top_canvas_height, width = self.screen_width, borderwidth=0, highlightthickness=0)
         number_canvas = tk.Canvas(self, height = number_canvas_height, width = self.screen_width, borderwidth=0, highlightthickness=0)
-        bottom_frame = tk.Frame(self, height = bottom_frame_height, width = self.screen_width)
+        bottom_canvas = tk.Canvas(self, height = bottom_canvas_height, width = self.screen_width, borderwidth=0, highlightthickness=0)
 
         #placement
-        top_frame.pack()
+        top_canvas.pack()
         number_canvas.pack()
-        bottom_frame.pack()
+        bottom_canvas.pack()
 
         #Creating number frames
         #setting dimensions
@@ -297,26 +297,39 @@ class GenerationPage(tk.Frame):
         #self.pointer_window = number_canvas.create_window(self.screen_width//2, number_canvas_height//7, window=self.pointer_line)        
 
         #backgrounds
-        top_frame["bg"] = GENBACKGROUND
+        top_canvas["bg"] = GENBACKGROUND
         number_canvas["bg"] = GENBACKGROUND
-        bottom_frame["bg"] = GENBACKGROUND
+        bottom_canvas["bg"] = GENBACKGROUND
 
         #Logo
         avh_logo_filepath = resource_path("./data/avh_logo_png.png")
         avh_logo = Image.open(avh_logo_filepath)
-        avh_logo = avh_logo.resize((int(self.screen_width/2), int(bottom_frame_height/1)))
+        avh_logo = avh_logo.resize((int(self.screen_width/2), int(bottom_canvas_height/1)))
+        avh_logo_width, avh_logo_height = avh_logo.size
+
+        avh_logo_outline_offset = self.screen_width//50
+        bottom_canvas.create_rectangle(self.screen_width/2 - avh_logo_width/2 - avh_logo_outline_offset, 
+                                       bottom_canvas_height/2.5 + avh_logo_height/2 + avh_logo_outline_offset +100,
+                                       self.screen_width/2 + avh_logo_width/2 + avh_logo_outline_offset, 
+                                       bottom_canvas_height/2.5 - avh_logo_height/2 - avh_logo_outline_offset,
+                                       fill = "black")
         self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
-        logo = ttk.Label(bottom_frame, image=self.avh_logo_image_tk)
-        logo.place(relx = 0.5, rely = 0.3, anchor = "center")
+        bottom_canvas.create_image(self.screen_width/2, bottom_canvas_height/2.5, image=self.avh_logo_image_tk)
 
         #Top text
         club17_font = tk.font.Font(self.controller,font = "Poppins")
         club17_font["size"] = int(self.screen_height//10)
-        #club17_text = tk.Text(top_frame, font = club17_font, bg = GENBACKGROUND, fg="white")
-        club17_text = tk.Label(top_frame, text="Club17 Member Draw", font = club17_font, bg = GENBACKGROUND, fg="white")
-        club17_text.place(relx = 0.5, rely = 0.7, anchor="center")
-        #member_draw_text.place(relx=0.5, rely=0.45, anchor="n")
-        #member_draw_text.lower(club17_text)
+        outline_offset = self.screen_width//250
+        # Create outline text items
+        outline_positions = [(-outline_offset, 0), (outline_offset, 0), (0, -outline_offset), (0, outline_offset)]
+
+        for dx, dy in outline_positions:
+            top_canvas.create_text(self.screen_width / 2 + dx, top_canvas_height / 1.5 + dy, text="Club17 Member Draw", font=club17_font, fill="black")
+        #club17_text = tk.Text(top_canvas, font = club17_font, bg = GENBACKGROUND, fg="white")
+        
+        club17_text = top_canvas.create_text(self.screen_width/2,top_canvas_height/1.5, 
+                                             text="Club17 Member Draw", font = club17_font, fill="white")
+        
         self.idle_animation()
 
     def space_pressed(self, event):

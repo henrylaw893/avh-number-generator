@@ -20,7 +20,7 @@ class NumberBox:
         self.canvas_width = canvas_width
         self.canvas_height = canvas_height
 
-        self.padding = self.canvas_width//200
+        self.padding = self.canvas_width//100
 
         # TODO: Create rectangle object
         num_padding = 1 + (num_boxes - 2)
