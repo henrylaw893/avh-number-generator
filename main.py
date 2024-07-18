@@ -159,7 +159,7 @@ class StartPage(tk.Frame):
         height = 450
         instruction_frame = tk.LabelFrame(self, 
         width = width, height = height, relief = "raised", borderwidth=8)
-        instruction_frame.place(relx = 0.7, rely = 0.4)
+        instruction_frame.place(relx = 0.65, rely = 0.35)
         # instruction_frame_x = instruction_frame.winfo_rootx()
         # instruction_frame_y = instruction_frame.winfo_rooty()
         
@@ -174,7 +174,7 @@ class StartPage(tk.Frame):
         instruction_text = tk.Label(instruction_frame, font = INSTRUCTIONFONT, text = "Press escape key to close program." +
         "\nEnter information and then press generate button\nto proceed to the generation screen.\n" +
         "Plug in HDMI adapter once on generation screen.\n" + 
-        "Press space on the next screen to generate number.\nPress the left arrow key to return to this page.")
+        "Press space on the next screen to show numbers scrolling\nPress space again to roll for a number\nPress space again after to reset to scrolling.")
         instruction_text.pack()
         # instruction_frame.tkraise()
 
@@ -304,17 +304,19 @@ class GenerationPage(tk.Frame):
         #Logo
         avh_logo_filepath = resource_path("./data/avh_logo_png.png")
         avh_logo = Image.open(avh_logo_filepath)
-        avh_logo = avh_logo.resize((int(self.screen_width/2), int(bottom_canvas_height/1)))
+        avh_logo = avh_logo.resize((int(self.screen_width/2), int(bottom_canvas_height/1.2)))
         avh_logo_width, avh_logo_height = avh_logo.size
 
-        avh_logo_outline_offset = self.screen_width//50
+        avh_logo_ypos = bottom_canvas_height/2.2
+
+        avh_logo_outline_offset = self.screen_width//250
         bottom_canvas.create_rectangle(self.screen_width/2 - avh_logo_width/2 - avh_logo_outline_offset, 
-                                       bottom_canvas_height/2.5 + avh_logo_height/2 + avh_logo_outline_offset +100,
+                                       avh_logo_ypos - avh_logo_height/2 - avh_logo_outline_offset,
                                        self.screen_width/2 + avh_logo_width/2 + avh_logo_outline_offset, 
-                                       bottom_canvas_height/2.5 - avh_logo_height/2 - avh_logo_outline_offset,
+                                       avh_logo_ypos + avh_logo_height/2 + avh_logo_outline_offset,
                                        fill = "black")
         self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
-        bottom_canvas.create_image(self.screen_width/2, bottom_canvas_height/2.5, image=self.avh_logo_image_tk)
+        bottom_canvas.create_image(self.screen_width/2, avh_logo_ypos, image=self.avh_logo_image_tk)
 
         #Top text
         club17_font = tk.font.Font(self.controller,font = "Poppins")

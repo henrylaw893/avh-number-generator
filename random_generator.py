@@ -13,6 +13,8 @@ class RandomGenerator:
         :blacklist: python list containing all the numbers not to be drawn -- needs to be something with contains
         """
         self.number_list = []
+        self.deleted_number_list = []
+        self.count = 0
         for number in range(min,max+1):
             if number not in blacklist:
                 if number < 10:
@@ -37,5 +39,21 @@ class RandomGenerator:
         number = set1.array[int]
         """
         index = randrange(0,len(self.number_list),1)
-        return self.number_list[index]
+        value = self.number_list[index]
+        if (len(self.number_list) <= 1) or (self.count >= 20):
+            self.regenerate()
+        else:
+            self.deleted_number_list.append(value)
+            self.number_list.pop(index)
+            self.count += 1
+        return value
+    
+    def regenerate(self) -> None:
+        """
+        Resets the number generator and count
+        """
+        for number in self.deleted_number_list:
+            self.number_list.append(number)
+        self.deleted_number_list = []
+        self.count = 0
 
