@@ -5,11 +5,52 @@ from PIL import ImageTk, Image
 import time
 from threading import Thread
 from csv import reader
+import os, sys
+from ctypes import windll, byref, create_unicode_buffer, create_string_buffer
+FR_PRIVATE  = 0x10
+FR_NOT_ENUM = 0x20
 
 from random_generator import RandomGenerator
 from stack_adt import ArrayStack
 from number_object import NumberObject
 from win_window import WinWindow
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
+def loadfont(fontpath, private=True, enumerable=False):
+    '''
+    Makes fonts located in file `fontpath` available to the font system.
+
+    `private`     if True, other processes cannot see this font, and this
+                  font will be unloaded when the process dies
+    `enumerable`  if True, this font will appear when enumerating fonts
+
+    See https://msdn.microsoft.com/en-us/library/dd183327(VS.85).aspx
+
+    '''
+    # This function was taken from
+    # https://github.com/ifwe/digsby/blob/f5fe00244744aa131e07f09348d10563f3d8fa99/digsby/src/gui/native/win/winfonts.py#L15
+    # This function is written for Python 2.x. For 3.x, you
+    # have to convert the isinstance checks to bytes and str
+    if isinstance(fontpath, str):
+        pathbuf = create_unicode_buffer(fontpath)
+        AddFontResourceEx = windll.gdi32.AddFontResourceExW
+    elif isinstance(fontpath, bytes):
+        pathbuf = create_string_buffer(fontpath)
+        AddFontResourceEx = windll.gdi32.AddFontResourceExA
+    else:
+        raise TypeError('fontpath must be of type str or unicode')
+
+    flags = (FR_PRIVATE if private else 0) | (FR_NOT_ENUM if not enumerable else 0)
+    numFontsAdded = AddFontResourceEx(byref(pathbuf), flags, 0)
+    return bool(numFontsAdded)
+
+#Load the font
+font_filepath = resource_path("./data/Poppins.ttf")
+loadfont(font_filepath)
 
 #LARGEFONT = tk.font(family = "Verdana", size = 35)
 TITLEFONT = ("Poppins", 40, "bold")
@@ -19,7 +60,6 @@ STARTCOLOUR = "#253556"
 GENBACKGROUND = "#253556"
 
 class tkinterApp(tk.Tk):
-	
 	# __init__ function for class tkinterApp 
     def __init__(self, *args, **kwargs): 
 		
@@ -64,50 +104,12 @@ class tkinterApp(tk.Tk):
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         
+        self.controller = controller
         self.member_num_input = 0
-        self.blacklist_list = []
-        def get_blacklist_list(member_num_input, blacklist_input) -> list:
-            #test member number is an integer
-            try:
-                self.member_num_input = int(str(member_num_input))
-            except:
-                member_num_input_label = ttk.Label(self, font = STARTPAGEFONT, text ="Invalid member number input!")
-                member_num_input_label.pack()
-                self.focus_set()
-                return
-            
-            blacklist_list = []
-            blacklist_stack = ArrayStack(len(blacklist_input))
-            for char in blacklist_input:
-                if char == ",":
-                    num = ""
-                    while not blacklist_stack.is_empty():
-                        num = blacklist_stack.pop() + num
-                    blacklist_list.append(int(num))
-                elif char ==" ":
-                    continue
-                else:
-                    try:
-                        num = int(char)
-                        blacklist_stack.push(char)
-                    except ValueError:
-                        blacklist_input_label = ttk.Label(self, font = STARTPAGEFONT, text ="Invalid member number input!")
-                        blacklist_input_label.pack()
-                        self.focus_set()
-                        return
-            num = ""
-            while not blacklist_stack.is_empty():
-                num = blacklist_stack.pop() + num
-            blacklist_list.append(int(num))
-            self.blacklist_list = blacklist_list
-            print(self.blacklist_list)
-            controller.show_frame(GenerationPage)
         
         #create frame
         tk.Frame.__init__(self, parent)
         
-          
-
         #grid configuration
         self.grid_columnconfigure(0, weight = 1)
         self.grid_rowconfigure([0,1,2,3],weight = 1)
@@ -120,7 +122,8 @@ class StartPage(tk.Frame):
         
 
         #Import picture
-        avh_logo = Image.open("avh_black_logo.jpg")
+        avh_logo_black = resource_path("./data/avh_black_logo.jpg")
+        avh_logo = Image.open(avh_logo_black)
         avh_logo = avh_logo.resize((500, 225))
         self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
         logo = ttk.Label(self, image=self.avh_logo_image_tk)
@@ -132,20 +135,15 @@ class StartPage(tk.Frame):
         member_num_lbl.pack(pady = 10)
 
         member_num_entry = ttk.Entry(centre_frame, font = STARTPAGEFONT, width = 10)
+        # TODO: Automate this so that it saves to a file and reads that each time so number is always correct
         member_num_entry.insert(0,"600")
         member_num_entry.pack(pady = 10)
         
-
-        blacklist_lbl = ttk.Label(centre_frame, font = STARTPAGEFONT, text ="Please input the numbers you would NOT like to be drawn\nInput example: 1,2,3,4,5", justify = "center")
-        blacklist_lbl.pack(pady = 20)
-        
-        blacklist_entry = ttk.Entry(centre_frame, font = STARTPAGEFONT, width = 20)
-        blacklist_entry.insert(0,"1,17,22,600")
-        blacklist_entry.pack(pady = 10)
+       
 
         #next page button button
         onto_generation_button = ttk.Button(centre_frame, text ="Draw Number", 
-        command=lambda : get_blacklist_list(member_num_entry.get(),blacklist_entry.get()))
+        command=lambda : self.next_page(member_num_entry.get()))
         onto_generation_button.pack(pady = 30, ipadx = 40, ipady = 20, side = "bottom")
 
         #quit button
@@ -192,10 +190,10 @@ class StartPage(tk.Frame):
 
         self.bind("<Escape>",escapeKey)
 
-        
-    
-    #Function to store the blacklist information
-    
+     #Next page generation function
+    def next_page(self, member_num_entry: str):
+        self.member_num_input = int(member_num_entry)
+        self.controller.show_frame(GenerationPage)    
 
 class GenerationPage(tk.Frame):
     def __init__(self, parent, controller, start_page):
@@ -265,7 +263,7 @@ class GenerationPage(tk.Frame):
                     number.move_number(dx)
             elapsedTimeFrames = (time.time() - timeStart)*1000
             #print(elapsedTime)
-            sleepTime = int(max(1,(desired_frame_duration-elapsedTimeFrames)))
+            sleepTime = round(max(1,(desired_frame_duration-elapsedTimeFrames)))
             #print(f"Sleeptime: {sleepTime}")
             self.after(sleepTime,self.run_normal_animation)
         else:
@@ -278,16 +276,19 @@ class GenerationPage(tk.Frame):
                 number.move_number(1)
         if self.run_idle_animation:
             elapsedTime = (time.time() - timeStart)*1000
-            #print(f"elapsed time: {elapsedTime}")
-            sleepTime = int(max(1,(desired_frame_duration-elapsedTime)))
-            #print(f"Sleeptime: {sleepTime}")
+            sleepTime = round(max(1,(desired_frame_duration-elapsedTime)))
             self.after(sleepTime,self.idle_animation)
 
     def get_blacklist(self, filepath: str) -> list:
         """
         hi
         """
-        with open(filepath, newline='') as blacklist_csv_file:
+        # Get the directory path of the current script (__file__)
+        script_dir = os.path.dirname(sys.argv[0])
+
+        # Construct the path to excel_data.csv relative to the script's directory
+        csv_file_path = os.path.join(script_dir, 'blacklist.csv')
+        with open(csv_file_path, newline='') as blacklist_csv_file:
             blacklist_reader = reader(blacklist_csv_file)
             blacklist_list = []
             for row in blacklist_reader:
@@ -300,7 +301,7 @@ class GenerationPage(tk.Frame):
         self.screen_height = self.controller.winfo_screenheight()
         self.screen_width = self.controller.winfo_screenwidth()
 
-        filepath = "blacklist.csv"
+        filepath = resource_path("./data/blacklist.csv")
         blacklist = self.get_blacklist(filepath)
         self.ran_gen = RandomGenerator(1,self.start_page.member_num_input,blacklist)
 
@@ -312,7 +313,7 @@ class GenerationPage(tk.Frame):
 
         #creation
         top_frame = tk.Frame(self, height = top_frame_height, width = self.screen_width)
-        number_frame_controller = tk.Canvas(self, height = number_frame_controller_height, width = self.screen_width)
+        number_frame_controller = tk.Canvas(self, height = number_frame_controller_height, width = self.screen_width, borderwidth=0, highlightthickness=0)
         bottom_frame = tk.Frame(self, height = bottom_frame_height, width = self.screen_width)
 
         #placement
@@ -324,7 +325,7 @@ class GenerationPage(tk.Frame):
         #setting dimensions
         num_frames = 7
         self.numbers = []
-        self.number_font = tk.font.Font(self.controller,font = "Poppins")
+        self.number_font = tk.font.Font(self.controller,font = "Segoe")
         self.number_font["size"] = -(int((self.screen_width/(num_frames-2))/2.5))
         for i in range(num_frames):
             self.numbers.append(NumberObject(number_frame_controller, self.number_font, num_frames,self.ran_gen))
@@ -339,11 +340,11 @@ class GenerationPage(tk.Frame):
             number.place_number(posx, posy)
             posx += self.number_width + padding
 
-        #Number(number_frame_controller, self.number_frame_width, number_font, num_frames,self.ran_gen)
-
+        #Creating pointer
+        # TODO: Make pointer a triangle
         self.pointer_line = tk.Frame(number_frame_controller, width = self.screen_width//110, height = number_frame_controller_height/4,
         borderwidth= self.screen_width//400, relief = "solid", bg = "red")
-        self.pointer_window = number_frame_controller.create_window(self.screen_width//2, number_frame_controller_height//7, window=self.pointer_line)        
+        self.pointer_window = number_frame_controller.create_window(self.screen_width//2, number_frame_controller_height//5, window=self.pointer_line)        
 
         #backgrounds
         top_frame["bg"] = GENBACKGROUND
@@ -351,12 +352,21 @@ class GenerationPage(tk.Frame):
         bottom_frame["bg"] = GENBACKGROUND
 
         #Logo
-        avh_logo = Image.open("avh_logo_png.png")
-        avh_logo = avh_logo.resize((550, 250))
+        avh_logo_filepath = resource_path("./data/avh_logo_png.png")
+        avh_logo = Image.open(avh_logo_filepath)
+        avh_logo = avh_logo.resize((int(self.screen_width/2), int(bottom_frame_height/1)))
         self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
         logo = ttk.Label(bottom_frame, image=self.avh_logo_image_tk)
-        logo.place(relx = 0.5, rely = 0.5, anchor = "center")
+        logo.place(relx = 0.5, rely = 0.3, anchor = "center")
 
+        #Top text
+        club17_font = tk.font.Font(self.controller,font = "Poppins")
+        club17_font["size"] = int(self.screen_height//9.5)
+        club17_text = tk.Label(top_frame, text="Club17 Member Draw", font = club17_font, bg = GENBACKGROUND, fg="white")
+        #member_draw_text = tk.Label(top_frame, text="Member Draw", font = club17_font, bg = GENBACKGROUND, fg="white")
+        club17_text.place(relx = 0.5, rely = 0.7, anchor="center")
+        #member_draw_text.place(relx=0.5, rely=0.45, anchor="n")
+        #member_draw_text.lower(club17_text)
         self.idle_animation()
 
     def check_final_pos(self):
@@ -382,11 +392,13 @@ class GenerationPage(tk.Frame):
     def show_winner_window(self, winning_number: str):
         #Create winning frame
         winning_font = tk.font.Font(self.controller,font = "Poppins")
-        winning_font["size"] = self.screen_height//3
-        border_width = self.screen_width//40
+        winning_font["size"] = int(self.screen_height/5.5)
+        border_width = self.screen_width//45
         self.win_window = WinWindow(self, font = winning_font, borderwidth=border_width, relief="solid")
         self.win_window.show_winner(winning_number=winning_number)
 
 # Driver Code
+
+
 app = tkinterApp()
 app.mainloop()
