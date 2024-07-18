@@ -212,7 +212,6 @@ class GenerationPage(tk.Frame):
         #Action controllers
         def leftKey(event):
             controller.show_frame(StartPage)
-            print("leftkey pressed")
 
         self.bind("<Left>",leftKey)
 
@@ -238,8 +237,6 @@ class GenerationPage(tk.Frame):
     def setup(self, event):
         self.screen_height = self.controller.winfo_screenheight()
         self.screen_width = self.controller.winfo_screenwidth()
-
-        print(f"width: {self.screen_width}, height: {self.screen_height}")
 
         filepath = resource_path("./data/blacklist.csv")
         blacklist = self.get_blacklist(filepath)
@@ -285,7 +282,7 @@ class GenerationPage(tk.Frame):
         #Creating pointer
         triangle_width = self.screen_width//15
         triangle_height = self.screen_height//15
-        triangle_posy = number_canvas_height//11
+        triangle_posy = number_canvas_height//10
         x0 = self.screen_width/2 - triangle_width//2
         y0 = triangle_posy
         x1 = self.screen_width/2 + triangle_width//2
@@ -320,7 +317,7 @@ class GenerationPage(tk.Frame):
         club17_text.place(relx = 0.5, rely = 0.7, anchor="center")
         #member_draw_text.place(relx=0.5, rely=0.45, anchor="n")
         #member_draw_text.lower(club17_text)
-        #self.idle_animation()
+        self.idle_animation()
 
     def space_pressed(self, event):
         if self.space_times_pressed == 0:

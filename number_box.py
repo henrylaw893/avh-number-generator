@@ -21,19 +21,18 @@ class NumberBox:
         self.canvas_height = canvas_height
 
         self.padding = self.canvas_width//200
-        print(f"padding = {self.padding}")
 
         # TODO: Create rectangle object
         num_padding = 1 + (num_boxes - 2)
         #width =  + (num_boxes-2)*(width_boxes)
         #width - borderwidth*(num_boxes-2) - num_padding*padding_width =  (num_boxes-2)*(width_boxes)
         border_width = self.canvas_width//150
-        self.rectangle_width = (self.canvas_width - 2*border_width*(num_boxes - 2)- (self.padding*num_padding))/(num_boxes - 2)
+        self.rectangle_width = (self.canvas_width - border_width*(num_boxes - 2)- (self.padding*num_padding))/(num_boxes - 2)
         self.rectangle_height = self.canvas_height//2
         self.canvas_rectangle = canvas.create_rectangle(0,0, self.rectangle_width, self.rectangle_height, fill="white", outline = "black", width = border_width)
         
-        self.box_width = self.rectangle_width + 2*border_width
-        self.box_height = self.rectangle_height + 2*border_width
+        self.box_width = self.rectangle_width + border_width
+        self.box_height = self.rectangle_height + border_width
 
         self.min_x = -self.box_width
 
@@ -45,7 +44,7 @@ class NumberBox:
         self.text_height = text_bound_box[3] - text_bound_box[1]
         self.text_width = text_bound_box[2] - text_bound_box[0]
 
-        self.inner_padding = (self.rectangle_width-self.text_width)/2
+        self.inner_padding = (self.box_width-self.text_width)/2
 
     def place_number(self, posx: float, posy: float) -> None:
         """
@@ -66,11 +65,11 @@ class NumberBox:
             self.canvas.move(self.canvas_rectangle, -dx, 0)
             self.posx_rectangle -= dx
         else:
+            self.canvas.itemconfig(self.canvas_text, text=self.ran_gen.generate_number())
             self.canvas.move(self.canvas_text, (self.num_boxes)*(self.box_width + self.padding) - dx, 0)
             self.canvas.move(self.canvas_rectangle, (self.num_boxes)*(self.box_width + self.padding) - dx, 0)
             self.posx_rectangle += (self.num_boxes)*(self.box_width + self.padding) - dx
-            #self.canvas_text = self.canvas.create_text(self.posx, self.posy, text = self.ran_gen.generate_number(), fill = "black", font = self.font)
-    
+                
     def get_width(self) -> float:
         """
         Returns the width of the number box (float)
