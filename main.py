@@ -342,9 +342,21 @@ class GenerationPage(tk.Frame):
 
         #Creating pointer
         # TODO: Make pointer a triangle
-        self.pointer_line = tk.Frame(number_frame_controller, width = self.screen_width//110, height = number_frame_controller_height/4,
-        borderwidth= self.screen_width//400, relief = "solid", bg = "red")
-        self.pointer_window = number_frame_controller.create_window(self.screen_width//2, number_frame_controller_height//5, window=self.pointer_line)        
+        triangle_width = self.screen_width//15
+        triangle_height = self.screen_height//15
+        triangle_posy = number_frame_controller_height//11
+        x0 = self.screen_width//2 - triangle_width//2
+        y0 = triangle_posy
+        x1 = self.screen_width//2 + triangle_width//2
+        y1 = triangle_posy
+        x2 = self.screen_width//2
+        y2 = triangle_posy + triangle_height
+
+        points = [x0,y0,x1,y1,x2,y2]
+        
+        self.pointer_line = number_frame_controller.create_polygon(points,
+        width= self.screen_width//200, outline = "black", fill = "white")
+        #self.pointer_window = number_frame_controller.create_window(self.screen_width//2, number_frame_controller_height//7, window=self.pointer_line)        
 
         #backgrounds
         top_frame["bg"] = GENBACKGROUND
@@ -361,7 +373,7 @@ class GenerationPage(tk.Frame):
 
         #Top text
         club17_font = tk.font.Font(self.controller,font = "Poppins")
-        club17_font["size"] = int(self.screen_height//9.5)
+        club17_font["size"] = int(self.screen_height//10)
         club17_text = tk.Label(top_frame, text="Club17 Member Draw", font = club17_font, bg = GENBACKGROUND, fg="white")
         #member_draw_text = tk.Label(top_frame, text="Member Draw", font = club17_font, bg = GENBACKGROUND, fg="white")
         club17_text.place(relx = 0.5, rely = 0.7, anchor="center")
@@ -370,7 +382,7 @@ class GenerationPage(tk.Frame):
         self.idle_animation()
 
     def check_final_pos(self):
-        self.pointer_x = self.pointer_line.winfo_rootx()
+        self.pointer_x = self.screen_width//2
         valid_end = False
         for frame in self.numbers:
             x_pos = frame.label.winfo_rootx()
