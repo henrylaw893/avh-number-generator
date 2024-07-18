@@ -2,8 +2,9 @@ import tkinter as tk
 import time
 
 class NumberObject:
-    def __init__(self, canvas, font, num_frames, ran_gen) -> None:
+    def __init__(self, canvas: tk.Canvas, font :tk.font.Font, num_frames: int, ran_gen) -> None:
         self.canvas = canvas
+        self.canvas_text = canvas.create_text(0,0, text = ran_gen.generate_number(), fill = "black", font = font)
         self.label = tk.Label(canvas,text = ran_gen.generate_number(), relief = "raised", borderwidth= 8)
         
         self.ran_gen = ran_gen
