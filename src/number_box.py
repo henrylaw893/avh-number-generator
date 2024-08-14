@@ -12,6 +12,16 @@ fix winner selection function
 import tkinter as tk
 
 class NumberBox:
+    """Summary of class here.
+
+    Longer class information...
+    Longer class information...
+
+    Attributes:
+        likes_spam: A boolean indicating if we like SPAM or not.
+        eggs: An integer count of the eggs we have laid.
+    """
+
     def __init__(self, canvas: tk.Canvas, font, num_boxes: int, canvas_width: int, canvas_height: int, ran_gen, ) -> None:
         self.canvas = canvas
         self.font = font

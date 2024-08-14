@@ -1,6 +1,15 @@
 from random import randrange
 
 class RandomGenerator:
+    """Summary of class here.
+
+    Longer class information...
+    Longer class information...
+
+    Attributes:
+        likes_spam: A boolean indicating if we like SPAM or not.
+        eggs: An integer count of the eggs we have laid.
+    """
 
     #intialise all the variables
     def __init__(self, min, max, blacklist):
@@ -47,9 +56,7 @@ class RandomGenerator:
         return value
     
     def regenerate(self) -> None:
-        """
-        Resets the number generator and count
-        """
+        """Resets the number generator and count"""
         for number in self.deleted_number_list:
             self.number_list.append(number)
         self.deleted_number_list = []

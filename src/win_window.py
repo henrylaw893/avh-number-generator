@@ -1,6 +1,16 @@
 import tkinter as tk
 
 class WinWindow:
+    """Summary of class here.
+
+    Longer class information...
+    Longer class information...
+
+    Attributes:
+        likes_spam: A boolean indicating if we like SPAM or not.
+        eggs: An integer count of the eggs we have laid.
+    """
+
     def __init__(self, controller: tk.Frame, font, borderwidth: int, relief: str) -> None:
         self.frame = tk.Frame(controller, borderwidth=borderwidth, relief=relief)
         self.label = tk.Label(self.frame, font=font)
