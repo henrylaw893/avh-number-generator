@@ -1,6 +1,4 @@
 from random import randrange
-from queue_adt import CircularQueue
-#Get list of numbers to exclude
 
 class RandomGenerator:
 

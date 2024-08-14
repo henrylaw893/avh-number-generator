@@ -99,8 +99,6 @@ class tkinterApp(tk.Tk):
         frame.focus_set()
         frame.tkraise()
 
-# first window frame startpage
-
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         
