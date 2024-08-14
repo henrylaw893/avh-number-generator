@@ -1,6 +1,3 @@
-import tkinter as tk
-import tkinter.ttk as ttk
-import time
 import os, sys
 from ctypes import windll, byref, create_unicode_buffer, create_string_buffer
 FR_PRIVATE  = 0x10
@@ -9,9 +6,7 @@ FR_NOT_ENUM = 0x20
 from generator_app import GeneratorApp
 from start_page import StartPage
 from generation_page import GenerationPage
-from random_generator import RandomGenerator
-from number_box import NumberBox
-from win_window import WinWindow
+
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
@@ -67,11 +62,11 @@ def main():
                                         background_colour=background_colour)
 
     #Add each page to the app
-    app.add_frame(start_page)
-    app.add_frame(generation_page)
+    app.add_frame(start_page, "StartPage")
+    app.add_frame(generation_page, "GenerationPage")
 
     #Show the start page
-    app.show_frame(start_page)
+    app.show_frame("StartPage")
 
     # Driver Code
     app.mainloop()

@@ -3,6 +3,7 @@ import sys
 
 from csv import reader
 import tkinter as tk
+from tkinter.font import Font
 from time import time
 from PIL import ImageTk
 from PIL import Image
@@ -49,7 +50,7 @@ class GenerationPage(tk.Frame):
 
         #Action controllers
         def leftKey(event):
-            app.show_frame(start_page)
+            app.show_frame("StartPage")
 
         self.bind("<Left>",leftKey)
 
@@ -99,7 +100,7 @@ class GenerationPage(tk.Frame):
         #setting dimensions
         num_boxes = 7
         self.numbers = []
-        self.number_font = tk.font.Font(self.app,font = "Segoe")
+        self.number_font = Font(family = "Segoe")
         self.number_font["size"] = -(int((self.screen_width/(num_boxes-2))/2.5))
         
         for i in range(num_boxes):
@@ -139,7 +140,7 @@ class GenerationPage(tk.Frame):
         bottom_canvas["bg"] = self.background_colour
 
         #Logo
-        avh_logo_filepath = resource_path("./data/avh_logo_png.png")
+        avh_logo_filepath = resource_path("../data/avh_logo_png.png")
         avh_logo = Image.open(avh_logo_filepath)
         avh_logo = avh_logo.resize((int(self.screen_width/2), int(bottom_canvas_height/1.2)))
         avh_logo_width, avh_logo_height = avh_logo.size
@@ -196,7 +197,7 @@ class GenerationPage(tk.Frame):
         script_dir = os.path.dirname(sys.argv[0])
 
         # Construct the path to excel_data.csv relative to the script's directory
-        csv_file_path = os.path.join(script_dir, 'blacklist.csv')
+        csv_file_path = os.path.join(script_dir, '../blacklist.csv')
         with open(csv_file_path, newline='') as blacklist_csv_file:
             blacklist_reader = reader(blacklist_csv_file)
             blacklist_list = []

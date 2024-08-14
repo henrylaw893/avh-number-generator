@@ -57,21 +57,22 @@ class GeneratorApp(tk.Tk):
         # initializing frames to an empty array
         self.frames = {}
 
-    def add_frame(self, frame: tk.Frame):
+    def add_frame(self, frame: tk.Frame, name: str):
         """Adds a frame into the app instance that acts like a page
         
         Args:
             frame: a tk.Frame instance that will act as a page
+            name: a string that is used to reference the frame to be displayed
         """
-        self.frames[frame] = frame
+        self.frames[name] = frame
         frame.grid(row = 0, column = 0, sticky ="nsew")
 
-    def show_frame(self, frame: tk.Frame):
+    def show_frame(self, name: str):
         """Displays the specified frame on the app
         
         Args:
-            frame: the tk.Frame instance that will be displayed
+            name: a string that references the frame to be displayed
         """
-        display_frame = self.frames[frame]
+        display_frame = self.frames[name]
         display_frame.focus_set()
         display_frame.tkraise()

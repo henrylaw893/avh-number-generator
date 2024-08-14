@@ -98,3 +98,7 @@ class StartPage(tk.Frame):
             app.destroy()
 
         self.bind("<Escape>",escapeKey)
+    
+    def next_page(self, member_num_entry: str):
+        self.member_num_input = int(member_num_entry)
+        self.app.show_frame("GenerationPage")  
