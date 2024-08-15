@@ -1,28 +1,48 @@
 """
-# TODO:
-what does canvas.move do? is it better than .moveto?
-figure out how to get the width and height of numbers as text
-use width and height of numbers as text to improve relative positioning (.configureitem probably/canvas.itemcget)
-    need to figure out the right option to use
-am I using .moveto correctly?
-fix winner selection function
+This module contains the number box that is used to display the animated numbers
 """
-
 
 import tkinter as tk
 
 class NumberBox:
-    """Summary of class here.
+    """A class to create and animate a number box on a tkinter canvas.
 
-    Longer class information...
-    Longer class information...
+    The `NumberBox` class handles the graphical representation of a number within 
+    a rectangular box on a tkinter canvas. The number box can be placed at specific 
+    coordinates, moved across the canvas, and its properties can be queried.
 
     Attributes:
-        likes_spam: A boolean indicating if we like SPAM or not.
-        eggs: An integer count of the eggs we have laid.
+        canvas (tk.Canvas): The canvas on which the number box is drawn.
+        font: The font used to display the number inside the box.
+        ran_gen: An instance of a random number generator to provide the numbers.
+        num_boxes (int): The total number of boxes to display in the animation.
+        canvas_width (int): The width of the canvas in pixels.
+        canvas_height (int): The height of the canvas in pixels.
+        padding (int): The padding between boxes in pixels.
+        rectangle_width (float): The calculated width of the rectangle box.
+        rectangle_height (float): The calculated height of the rectangle box.
+        canvas_rectangle: The rectangle object drawn on the canvas.
+        box_width (float): The total width of the box including the border.
+        box_height (float): The total height of the box including the border.
+        min_x (float): The minimum x-coordinate the box can move to before 
+                       resetting.
+        canvas_text: The text object that displays the number inside the box.
+        text_height (float): The height of the text inside the box.
+        text_width (float): The width of the text inside the box.
+        inner_padding (float): The padding between the text and the box border.
     """
 
     def __init__(self, canvas: tk.Canvas, font, num_boxes: int, canvas_width: int, canvas_height: int, ran_gen, ) -> None:
+        """Initializes the NumberBox with the provided canvas, font, and parameters.
+
+        Args:
+            canvas (tk.Canvas): The canvas on which to draw the number box.
+            font: The font used for displaying the number.
+            num_boxes (int): The number of boxes in the animation.
+            canvas_width (int): The width of the canvas.
+            canvas_height (int): The height of the canvas.
+            ran_gen: An instance of a random number generator.
+        """
         self.canvas = canvas
         self.font = font
         self.ran_gen = ran_gen
@@ -57,8 +77,14 @@ class NumberBox:
         self.inner_padding = (self.box_width-self.text_width)/2
 
     def place_number(self, posx: float, posy: float) -> None:
-        """
-        Places the middle left side of the number box at (posx, posy)
+        """Places the number box at the specified coordinates.
+
+        This method positions the top left corner of the rectangle and 
+        the text within it at the given coordinates.
+
+        Args:
+            posx (float): The x-coordinate for the middle left side of the number box.
+            posy (float): The y-coordinate for the middle left side of the number box.
         """
         #Top left corner of rectangle is placed at coordinates
         self.posx_rectangle = posx
@@ -70,6 +96,14 @@ class NumberBox:
         self.canvas.coords(self.canvas_text, self.posx_text, self.posy_text)
 
     def move_number(self, dx):
+        """Moves the number box horizontally by the specified distance.
+
+        If the box moves beyond the left edge of the canvas, it resets 
+        to the right side and displays a new number.
+
+        Args:
+            dx (float): The distance to move the box horizontally.
+        """
         if self.posx_rectangle > self.min_x:
             self.canvas.move(self.canvas_text, -dx, 0)
             self.canvas.move(self.canvas_rectangle, -dx, 0)
@@ -81,25 +115,33 @@ class NumberBox:
             self.posx_rectangle += (self.num_boxes)*(self.box_width + self.padding) - dx
                 
     def get_width(self) -> float:
-        """
-        Returns the width of the number box (float)
+        """Returns the width of the number box.
+
+        Returns:
+            float: The width of the box including the border.
         """
         return self.box_width
     
     def get_padding(self) -> int:
-        """
-        Return padding value of the number box (int)
+        """Returns the padding between boxes.
+
+        Returns:
+            int: The padding value in pixels.
         """
         return self.padding
 
     def get_number_as_str(self) -> str:
-        """
-        Return current number being displayed by number box
+        """Returns the current number displayed in the box.
+
+        Returns:
+            str: The number currently displayed in the box as a string.
         """
         return self.canvas.itemcget(self.canvas_text, "text")
     
     def get_xpos(self) -> float:
-        """
-        Returns the current x position of the left side of the rectangle
+        """Returns the current x-coordinate of the number box.
+
+        Returns:
+            float: The x-coordinate of the left side of the rectangle.
         """
         return self.posx_rectangle

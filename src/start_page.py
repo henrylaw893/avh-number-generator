@@ -1,3 +1,8 @@
+"""
+This module defines a tkinter frame that is used as the start frame for the Random Number Generator.
+
+The frame allows the user to input the highest number they want to be drawn
+"""
 import os
 import sys
 import tkinter as tk
@@ -141,7 +146,7 @@ class StartPage(tk.Frame):
         def escapeKey(event):
             app.destroy()
 
-        self.bind("<Escape>",escapeKey)
+        self.bind("<Escape>", escapeKey)
     
     def next_page(self, member_num_entry: str):
         self.member_num_input = int(member_num_entry)

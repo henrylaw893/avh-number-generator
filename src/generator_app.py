@@ -1,44 +1,42 @@
-"""A one-line summary of the module or program, terminated by a period.
+"""
+This module defines the main application structure for a tkinter-based random number 
+generation program.
 
-Leave one blank line.  The rest of this docstring should contain an
-overall description of the module or program.  Optionally, it may also
-contain a brief description of exported classes and functions and/or usage
-examples.
+The module includes the `GeneratorApp` class, which is the main application window 
+that manages different frames (or pages) within the application. The class provides 
+methods to add frames and switch between them, enabling a multi-page user interface.
 
 Typical usage example:
 
-  foo = ClassFoo()
-  bar = foo.FunctionBar()
+    app = GeneratorApp()
+    app.add_frame(start_page_frame, "StartPage")
+    app.show_frame("StartPage")
+    app.mainloop()
 """
-
 import tkinter as tk
 
 class GeneratorApp(tk.Tk):
-    """Summary of class here.
+    """The main application class for managing frames in a tkinter-based GUI.
 
-    Longer class information...
-    Longer class information...
+    The `GeneratorApp` class inherits from `tk.Tk` and provides functionality 
+    to manage multiple frames (pages) within the application, handle fullscreen 
+    mode, and control the layout and switching of different frames.
 
     Attributes:
-        likes_spam: A boolean indicating if we like SPAM or not.
-        eggs: An integer count of the eggs we have laid.
+        frame (tk.Frame): The main container frame for all the child frames.
+        frames (dict): A dictionary mapping frame names (str) to their corresponding 
+                       `tk.Frame` instances, used for switching between pages.
     """
 
     def __init__(self, *args, **kwargs):
-        """Creates an instance of 
+        """Initializes the GeneratorApp instance.
 
-        The __init__ method may be documented in either the class level
-        docstring, or as a docstring on the __init__ method itself.
-
-        Either form is acceptable, but the two should not be mixed. Choose one
-        convention to document the __init__ method and be consistent with it.
+        This method sets up the main window, enables fullscreen mode, and 
+        initializes the container frame where all other frames will be added.
 
         Args:
-            param1 (str): Description of `param1`.
-            param2 (:obj:`int`, optional): Description of `param2`. Multiple
-                lines are supported.
-            param3 (:obj:`list` of :obj:`str`): Description of `param3`.
-
+            *args: Variable length argument list for passing to the tk.Tk initializer.
+            **kwargs: Arbitrary keyword arguments for passing to the tk.Tk initializer.
         """
         # __init__ function for class Tk
         tk.Tk.__init__(self, *args, **kwargs)
@@ -59,10 +57,10 @@ class GeneratorApp(tk.Tk):
 
     def add_frame(self, frame: tk.Frame, name: str):
         """Adds a frame into the app instance that acts like a page
-        
+
         Args:
-            frame: a tk.Frame instance that will act as a page
-            name: a string that is used to reference the frame to be displayed
+            frame (tk.Frame): The frame instance to add to the application.
+            name (str): The name associated with the frame, used for reference.
         """
         self.frames[name] = frame
         frame.grid(row = 0, column = 0, sticky ="nsew")
@@ -71,7 +69,7 @@ class GeneratorApp(tk.Tk):
         """Displays the specified frame on the app
         
         Args:
-            name: a string that references the frame to be displayed
+            name (str): a string that references the frame to be displayed
         """
         display_frame = self.frames[name]
         display_frame.focus_set()
