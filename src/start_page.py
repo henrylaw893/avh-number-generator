@@ -43,17 +43,18 @@ class StartPage(tk.Frame):
         top_canvas.grid(row = 0, column = 0)
         centre_canvas = tk.Canvas(self, width = 800, height = 650, bg=background_colour, borderwidth=0, highlightthickness=0)
         centre_canvas.grid(row = 1, column = 0)
-        bottom_canvas = tk.Canvas(self, width = 800, height = 500, bg=background_colour, borderwidth=0, highlightthickness=0)
-        bottom_canvas.grid(row = 2, column = 0)
         
-        #Import picture
-        avh_logo_black = resource_path("../data/avh_black_logo.jpg")
-        avh_logo = Image.open(avh_logo_black)
-        avh_logo = avh_logo.resize((500, 225))
-        self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
+        # bottom_canvas = tk.Canvas(self, width = 800, height = 500, bg=background_colour, borderwidth=0, highlightthickness=0)
+        # bottom_canvas.grid(row = 2, column = 0)
+        
+        # #Import picture
+        # avh_logo_black = resource_path("../data/avh_black_logo.jpg")
+        # avh_logo = Image.open(avh_logo_black)
+        # avh_logo = avh_logo.resize((500, 225))
+        # self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
 
-        #Place picture
-        bottom_canvas.create_image(centre_canvas.winfo_reqwidth()/2, 650-225, image=self.avh_logo_image_tk)
+        # #Place picture
+        # bottom_canvas.create_image(centre_canvas.winfo_reqwidth()/2, 650-225, image=self.avh_logo_image_tk)
        
         #Member number label and entry
         member_num_lbl = tk.Label(centre_canvas, font = fonts["start_page"], bg=background_colour,
