@@ -1,12 +1,12 @@
 import os, sys
 from ctypes import windll, byref, create_unicode_buffer, create_string_buffer
-FR_PRIVATE  = 0x10
-FR_NOT_ENUM = 0x20
 
 from generator_app import GeneratorApp
 from start_page import StartPage
 from generation_page import GenerationPage
 
+FR_PRIVATE  = 0x10
+FR_NOT_ENUM = 0x20
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
@@ -57,7 +57,8 @@ def main():
     app = GeneratorApp()
 
     #Create each page
-    start_page = StartPage(parent=app.frame, app=app, fonts=fonts)
+    start_page = StartPage(parent=app.frame, app=app, fonts=fonts, 
+                           background_colour=background_colour)
     generation_page = GenerationPage(parent=app.frame, app=app, start_page=start_page, 
                                         background_colour=background_colour)
 

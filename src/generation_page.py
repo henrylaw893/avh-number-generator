@@ -132,7 +132,6 @@ class GenerationPage(tk.Frame):
         
         self.pointer_line = number_canvas.create_polygon(points,
         width= self.screen_width//200, outline = "black", fill = "white")
-        #self.pointer_window = number_canvas.create_window(self.screen_width//2, number_canvas_height//7, window=self.pointer_line)        
 
         #backgrounds
         top_canvas["bg"] = self.background_colour
@@ -160,6 +159,7 @@ class GenerationPage(tk.Frame):
         club17_font = tk.font.Font(self.app,font = "Poppins")
         club17_font["size"] = int(self.screen_height//10)
         outline_offset = self.screen_width//250
+        
         # Create outline text items
         outline_positions = [(-outline_offset, 0), (outline_offset, 0), (0, -outline_offset), (0, outline_offset)]
 
