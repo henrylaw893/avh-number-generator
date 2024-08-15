@@ -32,29 +32,30 @@ class StartPage(tk.Frame):
         
         #create frame
         tk.Frame.__init__(self, parent)
+
+        #Get screen height and width
+        self.screen_height = self.app.winfo_screenheight()
+        self.screen_width = self.app.winfo_screenwidth()
         
         #grid configuration
         self.grid_columnconfigure(0, weight = 1)
         self.grid_rowconfigure([0,1,2,3],weight = 1)
         self["bg"] = background_colour
         
-        #Create base canvasses
-        top_canvas = tk.Canvas(self, width=700, height = 200, bg=background_colour, borderwidth=0, highlightthickness=0)
-        top_canvas.grid(row = 0, column = 0)
-        centre_canvas = tk.Canvas(self, width = 800, height = 650, bg=background_colour, borderwidth=0, highlightthickness=0)
-        centre_canvas.grid(row = 1, column = 0)
+        #Set canvas sizing
+        top_canvas_height = self.screen_height/4.5
+        centre_canvas_height = self.screen_height/2.5
+        bottom_canvas_height = self.screen_height - top_canvas_height - centre_canvas_height
         
-        # bottom_canvas = tk.Canvas(self, width = 800, height = 500, bg=background_colour, borderwidth=0, highlightthickness=0)
-        # bottom_canvas.grid(row = 2, column = 0)
+        #Create canvasses
+        top_canvas = tk.Canvas(self, width=self.screen_width, height=top_canvas_height, bg=background_colour, borderwidth=0, highlightthickness=0)
+        centre_canvas = tk.Canvas(self, width=self.screen_width, height=centre_canvas_height, bg=background_colour, borderwidth=0, highlightthickness=0)
+        bottom_canvas = tk.Canvas(self, height = bottom_canvas_height, width = self.screen_width, bg=background_colour, borderwidth=0, highlightthickness=0)
         
-        # #Import picture
-        # avh_logo_black = resource_path("../data/avh_black_logo.jpg")
-        # avh_logo = Image.open(avh_logo_black)
-        # avh_logo = avh_logo.resize((500, 225))
-        # self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
-
-        # #Place picture
-        # bottom_canvas.create_image(centre_canvas.winfo_reqwidth()/2, 650-225, image=self.avh_logo_image_tk)
+        #Place canvasses
+        top_canvas.pack()
+        centre_canvas.pack()
+        bottom_canvas.pack()
        
         #Member number label and entry
         member_num_lbl = tk.Label(centre_canvas, font = fonts["start_page"], bg=background_colour,
@@ -72,10 +73,26 @@ class StartPage(tk.Frame):
         onto_generation_button.pack(pady = 30, ipadx = 40, ipady = 20, side = "bottom")
 
         #quit button
-        quit_button = tk.Button(self, text = "Quit", font = fonts["start_page"], command = lambda : app.destroy())
-        quit_button.grid(row = 3, column = 0)
+        quit_button = tk.Button(bottom_canvas, text = "Quit", font = fonts["start_page"], command = lambda : app.destroy())
+        quit_button_x = self.screen_width//2 - quit_button.winfo_reqwidth()/2
+        quit_button_y = bottom_canvas_height//1.6
+        quit_button.place(x = quit_button_x ,y = quit_button_y)
 
         #Title
+        #Top text
+        club17_font = tk.font.Font(self.app,font = fonts["title"])
+        club17_font["size"] = int(self.screen_height//10)
+        outline_offset = self.screen_width//250
+        
+        # Create outline text items
+        outline_positions = [(-outline_offset, 0), (outline_offset, 0), (0, -outline_offset), (0, outline_offset)]
+
+        for dx, dy in outline_positions:
+            top_canvas.create_text(self.screen_width / 2 + dx, top_canvas_height / 1.5 + dy, text="Club17 Member Draw", font=club17_font, fill="black")
+        #club17_text = tk.Text(top_canvas, font = club17_font, bg = GENBACKGROUND, fg="white")
+        
+        club17_text = top_canvas.create_text(self.screen_width/2,top_canvas_height/1.5, 
+                                             text="Club17 Member Draw", font = club17_font, fill="white")
         title_label = tk.Label(top_canvas, font = fonts["title"], 
                                text = "Arcadia Village Hotel\nClub17 Member Draw", 
                                bg=background_colour,
