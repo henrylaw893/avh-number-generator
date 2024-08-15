@@ -44,6 +44,8 @@ class GenerationPage(tk.Frame):
         self.run_idle_animation = True
         self.space_times_pressed = 0
         self.background_colour = background_colour
+        self.prev_screen_width = self.app.winfo_screenwidth()
+        self.prev_screen_height = self.app.winfo_screenheight()
         
         #Pre-setup background set
         self["bg"] = background_colour
@@ -71,6 +73,8 @@ class GenerationPage(tk.Frame):
         self.bind("<Right>", start_idle)
 
         self.bind("<Down>",stop_idle)
+
+        self.bind("<Configure>", self.on_resize)
 
     def setup(self, event):
         self.screen_height = self.app.winfo_screenheight()
@@ -165,12 +169,22 @@ class GenerationPage(tk.Frame):
 
         for dx, dy in outline_positions:
             top_canvas.create_text(self.screen_width / 2 + dx, top_canvas_height / 1.5 + dy, text="Club17 Member Draw", font=club17_font, fill="black")
-        #club17_text = tk.Text(top_canvas, font = club17_font, bg = GENBACKGROUND, fg="white")
         
-        club17_text = top_canvas.create_text(self.screen_width/2,top_canvas_height/1.5, 
-                                             text="Club17 Member Draw", font = club17_font, fill="white")
+        top_canvas.create_text(self.screen_width/2,top_canvas_height/1.5, 
+                                text="Club17 Member Draw", font = club17_font, fill="white")
         
         self.idle_animation()
+
+    def on_resize(self, event):
+        # Get new width and height
+        new_width = self.app.winfo_screenwidth()
+        new_height = self.app.winfo_screenheight()
+
+        #Check if the event was actually a resize
+        if (new_width != self.prev_screen_width) | (new_height != self.prev_screen_height):
+            print("screen resized")
+            print(f"width: {self.app.winfo_screenwidth()}, height: {self.app.winfo_screenheight()}")
+            self.setup()
 
     def space_pressed(self, event):
         if self.space_times_pressed == 0:

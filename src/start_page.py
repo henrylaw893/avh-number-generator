@@ -44,39 +44,21 @@ class StartPage(tk.Frame):
         
         #Set canvas sizing
         top_canvas_height = self.screen_height/4.5
+        lower_top_canvas_height = self.screen_height/12
         centre_canvas_height = self.screen_height/2.5
         bottom_canvas_height = self.screen_height - top_canvas_height - centre_canvas_height
         
         #Create canvasses
         top_canvas = tk.Canvas(self, width=self.screen_width, height=top_canvas_height, bg=background_colour, borderwidth=0, highlightthickness=0)
+        lower_top_canvas = tk.Canvas(self, width=self.screen_width, height=lower_top_canvas_height, bg=background_colour, borderwidth=0, highlightthickness=0)
         centre_canvas = tk.Canvas(self, width=self.screen_width, height=centre_canvas_height, bg=background_colour, borderwidth=0, highlightthickness=0)
         bottom_canvas = tk.Canvas(self, height = bottom_canvas_height, width = self.screen_width, bg=background_colour, borderwidth=0, highlightthickness=0)
         
         #Place canvasses
         top_canvas.pack()
+        lower_top_canvas.pack()
         centre_canvas.pack()
         bottom_canvas.pack()
-       
-        #Member number label and entry
-        member_num_lbl = tk.Label(centre_canvas, font = fonts["start_page"], bg=background_colour,
-                                  text ="Please input the current highest member number below")
-        member_num_lbl.pack(pady = 10)
-
-        member_num_entry = tk.Entry(centre_canvas, font = fonts["start_page"], width = 10)
-        # TODO: Automate this so that it saves to a file and reads that each time so number is always correct
-        member_num_entry.insert(0,"600")
-        member_num_entry.pack(pady = 10)
-        
-        #next page button 
-        onto_generation_button = tk.Button(centre_canvas, text ="Draw Number", font = fonts["start_page"],
-            command=lambda : self.next_page(member_num_entry.get()))
-        onto_generation_button.pack(pady = 30, ipadx = 40, ipady = 20, side = "bottom")
-
-        #quit button
-        quit_button = tk.Button(bottom_canvas, text = "Quit", font = fonts["start_page"], command = lambda : app.destroy())
-        quit_button_x = self.screen_width//2 - quit_button.winfo_reqwidth()/2
-        quit_button_y = bottom_canvas_height//1.6
-        quit_button.place(x = quit_button_x ,y = quit_button_y)
 
         #Title
         #Top text
@@ -89,22 +71,41 @@ class StartPage(tk.Frame):
 
         for dx, dy in outline_positions:
             top_canvas.create_text(self.screen_width / 2 + dx, top_canvas_height / 1.5 + dy, text="Club17 Member Draw", font=club17_font, fill="black")
-        #club17_text = tk.Text(top_canvas, font = club17_font, bg = GENBACKGROUND, fg="white")
         
-        club17_text = top_canvas.create_text(self.screen_width/2,top_canvas_height/1.5, 
-                                             text="Club17 Member Draw", font = club17_font, fill="white")
-        title_label = tk.Label(top_canvas, font = fonts["title"], 
-                               text = "Arcadia Village Hotel\nClub17 Member Draw", 
-                               bg=background_colour,
-                               justify = "center")
-        title_label.pack(fill = tk.BOTH, expand = 1)
+        top_canvas.create_text(self.screen_width/2,top_canvas_height/1.5, 
+                                text="Club17 Member Draw", font = club17_font, fill="white")
+        
+        # Creating Input text 
+        # Create outline text items
+        input_text_xpos = self.screen_width / 2
+        input_text_ypos = lower_top_canvas_height / 2
+
+        outline_offset = 2
+        outline_positions = [(-outline_offset, 0), (outline_offset, 0), (0, -outline_offset), (0, outline_offset)]
+
+        for dx, dy in outline_positions:
+            lower_top_canvas.create_text(input_text_xpos + dx, input_text_ypos + dy, text="Please input the current highest member number below", font=fonts["start_page"], fill="black")
+        
+        lower_top_canvas.create_text(input_text_xpos, input_text_ypos, 
+                                    text="Please input the current highest member number below", 
+                                    font = fonts["start_page"], fill="white")
+
+        member_num_entry = tk.Entry(centre_canvas, font = fonts["start_page"], width = 10)
+        # TODO: Automate this so that it saves to a file and reads that each time so number is always correct
+        member_num_entry.insert(0,"600")
+        member_num_entry.pack()
+        
+        #next page button 
+        onto_generation_button = tk.Button(centre_canvas, text ="Draw Number", font = fonts["start_page"],
+            command=lambda : self.next_page(member_num_entry.get()))
+        onto_generation_button.pack(pady = 30, ipadx = 40, ipady = 20, side = "bottom")
 
         #Instructions
         width = 275
         height = 450
         instruction_frame = tk.LabelFrame(self, 
         width = width, height = height, relief = "raised", borderwidth=8)
-        instruction_frame.place(relx = 0.65, rely = 0.35)
+        instruction_frame.place(relx = 0.65, rely = 0.29)
 
         instruction_title = tk.Label(instruction_frame, font = fonts["start_page"], text = "Instructions", justify = "center")
         instruction_title.pack(side = "top")
@@ -118,9 +119,23 @@ class StartPage(tk.Frame):
                                     "Left arrowkey to go back")
         instruction_text.pack()
 
-        # #Change style
-        # self.style = tk.Style(self)
-        # self.style.configure("TButton", font = fonts["start_page"])   
+        #Import picture
+        avh_logo_black = resource_path("../data/avh_black_logo.jpg")
+        avh_logo = Image.open(avh_logo_black)
+        avh_logo = avh_logo.resize((600, 325))
+        self.avh_logo_image_tk = ImageTk.PhotoImage(avh_logo)
+
+        #Place picture
+        avh_logo_x = self.screen_width/2
+        avh_logo_y = bottom_canvas_height/3
+        bottom_canvas.create_image(avh_logo_x, avh_logo_y, image=self.avh_logo_image_tk)
+
+        #quit button
+        quit_button = tk.Button(bottom_canvas, text = "Quit", font = fonts["start_page"], command = lambda : app.destroy())
+        
+        quit_button_x = self.screen_width//2 - quit_button.winfo_reqwidth()/2
+        quit_button_y = bottom_canvas_height//1.25
+        quit_button.place(x = quit_button_x ,y = quit_button_y)
 
         #Arrowkeys
         def escapeKey(event):
