@@ -145,4 +145,5 @@ class StartPage(tk.Frame):
     
     def next_page(self, member_num_entry: str):
         self.member_num_input = int(member_num_entry)
-        self.app.show_frame("GenerationPage")  
+        self.app.frames["GenerationPage"].setup()
+        self.app.show_frame("GenerationPage")

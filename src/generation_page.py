@@ -76,11 +76,11 @@ class GenerationPage(tk.Frame):
 
         self.bind("<Configure>", self.on_resize)
 
-    def setup(self, event):
+    def setup(self):
         self.screen_height = self.app.winfo_screenheight()
         self.screen_width = self.app.winfo_screenwidth()
 
-        filepath = resource_path("../data/blacklist.csv")
+        filepath = resource_path("../blacklist.csv")
         blacklist = self.get_blacklist(filepath)
         self.ran_gen = RandomGenerator(1,self.start_page.member_num_input,blacklist)
 
@@ -184,24 +184,23 @@ class GenerationPage(tk.Frame):
         if (new_width != self.prev_screen_width) | (new_height != self.prev_screen_height):
             print("screen resized")
             print(f"width: {self.app.winfo_screenwidth()}, height: {self.app.winfo_screenheight()}")
-            self.setup()
 
     def space_pressed(self, event):
         if self.space_times_pressed == 0:
-            self.setup(event)
+            self.setup()
             self.space_times_pressed += 1
         elif self.space_times_pressed == 1:
             self.run_idle_animation = False
             self.startTime = time()
             self.run_normal_animation()
             self.space_times_pressed += 1
-        elif self.space_times_pressed == 2:
+        elif self.space_times_pressed == 1:
             #Close winning window, bring back to idle animation
             self.win_window.hide()
             self.win_window = None
             self.run_idle_animation = True
             self.idle_animation()
-            self.space_times_pressed = 1
+            self.space_times_pressed = 2
 
     def get_blacklist(self, filepath: str) -> list:
         """
@@ -211,7 +210,7 @@ class GenerationPage(tk.Frame):
         script_dir = os.path.dirname(sys.argv[0])
 
         # Construct the path to excel_data.csv relative to the script's directory
-        csv_file_path = os.path.join(script_dir, '../blacklist.csv')
+        csv_file_path = os.path.join(script_dir, filepath)
         with open(csv_file_path, newline='') as blacklist_csv_file:
             blacklist_reader = reader(blacklist_csv_file)
             blacklist_list = []
