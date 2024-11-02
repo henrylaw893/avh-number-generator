@@ -115,8 +115,7 @@ class StartPage(tk.Frame):
                                     "Enter information and then press Draw Number\n" + 
                                     "Press space on the next screen to show numbers scrolling\n" +
                                     "Press space again to roll for a number\n" +
-                                    "Press space again after to reset\n" +
-                                    "Left arrowkey to go back")
+                                    "Press space again after to reset\n")
         instruction_text.pack()
 
         #Import picture

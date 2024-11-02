@@ -42,7 +42,7 @@ class GenerationPage(tk.Frame):
         self.start_page = start_page
         self.app = app
         self.run_idle_animation = True
-        self.space_times_pressed = 0
+        self.space_times_pressed = 1
         self.background_colour = background_colour
         self.prev_screen_width = self.app.winfo_screenwidth()
         self.prev_screen_height = self.app.winfo_screenheight()
@@ -51,28 +51,16 @@ class GenerationPage(tk.Frame):
         self["bg"] = background_colour
 
         #Action controllers
-        def leftKey(event):
-            app.show_frame("StartPage")
-
-        self.bind("<Left>",leftKey)
 
         def escapeKey(event):
-            app.destroy()
-
-        def stop_idle(event):
-            self.run_idle_animation = False
-
-        def start_idle(event):
-            self.run_idle_animation = True
-            self.idle_animation()            
+            if self.space_times_pressed == 1:
+                app.destroy()
+            else:
+                self.space_pressed(event)
 
         self.bind("<Escape>",escapeKey)
 
         self.bind("<space>",self.space_pressed)
-
-        self.bind("<Right>", start_idle)
-
-        self.bind("<Down>",stop_idle)
 
         self.bind("<Configure>", self.on_resize)
 
@@ -186,21 +174,18 @@ class GenerationPage(tk.Frame):
             print(f"width: {self.app.winfo_screenwidth()}, height: {self.app.winfo_screenheight()}")
 
     def space_pressed(self, event):
-        if self.space_times_pressed == 0:
-            self.setup()
-            self.space_times_pressed += 1
-        elif self.space_times_pressed == 1:
+        if self.space_times_pressed == 1:
             self.run_idle_animation = False
             self.startTime = time()
             self.run_normal_animation()
             self.space_times_pressed += 1
-        elif self.space_times_pressed == 1:
+        elif self.space_times_pressed == 2:
             #Close winning window, bring back to idle animation
             self.win_window.hide()
             self.win_window = None
             self.run_idle_animation = True
             self.idle_animation()
-            self.space_times_pressed = 2
+            self.space_times_pressed = 1
 
     def get_blacklist(self, filepath: str) -> list:
         """
@@ -223,7 +208,7 @@ class GenerationPage(tk.Frame):
     def run_normal_animation(self):
         timeStart = time()
         elapsedTime = timeStart - self.startTime
-        dx = 150*pow(2,-0.5*(elapsedTime)) - 1.8
+        dx = 150*pow(2,-0.6*(elapsedTime)) - 0.3
         #print(f"Elapsed time: {elapsedTime}, dx: {dx}")
         desired_frame_duration = 16
         if dx > 0:

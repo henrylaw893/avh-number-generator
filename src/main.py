@@ -14,16 +14,14 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 def loadfont(fontpath, private=True, enumerable=False):
-    '''
+    """
     Makes fonts located in file `fontpath` available to the font system.
 
     `private`     if True, other processes cannot see this font, and this
                   font will be unloaded when the process dies
     `enumerable`  if True, this font will appear when enumerating fonts
 
-    See https://msdn.microsoft.com/en-us/library/dd183327(VS.85).aspx
-
-    '''
+    """
     # This function was taken from
     # https://github.com/ifwe/digsby/blob/f5fe00244744aa131e07f09348d10563f3d8fa99/digsby/src/gui/native/win/winfonts.py#L15
     if isinstance(fontpath, str):
